@@ -1,0 +1,65 @@
+HAAS ADVOCACIA 
+SITE 
+
+Home - Sobre Nós - Serviços - Blog 
+
+Logo ser mais visível - ter um destaque maior. Utilizar a logo diretamente pelo drive (qualidade de imagem)
+
+Paleta de Cores mantém preto e dourado, fazendo o contraste com o branco. 
+
+Sobre nós deve seguir 2 partes
+1) HAAS ADVOCACIA (texto com informações do escritório) 
+2) Profissionais: Dra Aline e Dra Heloísa. Aqui deve conter o currículo/informações de cada profissional. 
+
+
+Serviços/Área de Atuação 
+Previdenciário - Aline  
+Trabalhista - Heloísa
+Civil e Família, não precisa especificar (as 2 fazem) 
+
+
+Observação: quando a pessoa clicar na área, deve abrir uma página de autoridade do advogado especialista. 
+Adicionar currículo (a heloisa e aline vão mandar)
+
+Previdenciário: Aposentadoria por Tempo de Contribuição
+Aposentadoria Especial
+Aposentadoria por Invalidez
+Planejamento Previdenciário
+Revisão de Benefícios
+Auxílio-doença e Auxílio-Acidente
+Pensão por Morte
+Benefício Assistencial (LOAS)
+Defesa Administrativa e Judicial contra o INSS
+Contagem de Tempo de Contribuição
+Desaposentação
+Aposentadoria para Servidores Públicos
+Assessoria para Empresas sobre Contribuições Previdenciárias
+
+
+Trabalhista: Reclamações Trabalhistas (Direitos Trabalhistas)
+Cálculo de Rescisão Trabalhista
+Assédio Moral e Sexual no Trabalho
+Acidentes de Trabalho e Doenças Ocupacionais
+Horas Extras, Adicional Noturno e Insalubridade
+Rescisão Indireta e Justa Causa
+Defesa de Empresas em Processos Trabalhistas
+Acordos e Mediação Trabalhista
+Consultoria para Empresas sobre Direito Trabalhista
+Revisão de Contratos de Trabalho
+Defesa em Processos de Acidente de Trabalho
+Terceirização e Reformas Trabalhistas
+Advocacia Preventiva para Empresas
+
+
+Seguir o exemplo da BNMA como um modelo.
+https://bnmaadvogados.com.br/
+
+===========================================================================
+
+
+INFOS DE DEPLOY:
+
+Para deploy no Hostinger: push pro GitHub → ativar Git Auto-Deploy no 
+hPanel apontando pra main → o site sobe direto em public_html/. 
+Se o plano Single ficar apertado no vídeo de 13.78MB, 
+considerar Bunny.net Stream ou upgrade pro Premium.

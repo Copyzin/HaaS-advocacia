@@ -1,0 +1,2607 @@
+/* =========================================================================
+   HAAS Advocacia — Stylesheet
+   Overrides + utilities que complementam o Tailwind v4 (CDN) e os tokens
+   declarados no <style type="text/tailwindcss"> de cada página.
+
+   Fonte de verdade visual: DESIGN.md
+   ========================================================================= */
+
+/* -------------------------------------------------------------------------
+   Tokens locais — Section background system
+   ------------------------------------------------------------------------- */
+
+:root {
+  /* Sistema de fundo de seção — alternância entre 2 tons:
+     - --bg-section-emphasis: Full Black (#000) — Hero, Serviços, Localização, CTA Final.
+       Tom "operacional/sério".
+     - --bg-section-default: Warm Black (#120C0D) — Sobre, FAQ, Footer.
+       Tom "humano/íntimo" com tinta levemente bordô que aquece a paleta sem competir
+       com o dourado da marca.
+     O film grain global (body::before) aplica textura sobre todo o site. */
+  --bg-section-emphasis: #000000;
+  --bg-section-default: #120C0D;
+}
+
+/* Atalhos pro sistema tonal de seção */
+.bg-section-emphasis {
+  background-color: var(--bg-section-emphasis);
+}
+
+.bg-section-default {
+  background-color: var(--bg-section-default);
+}
+
+/* -------------------------------------------------------------------------
+   Film grain global
+   ------------------------------------------------------------------------- */
+
+/* Ruído procedural via SVG feTurbulence (fonte: noise effect.md).
+   Tile 240×240 escalado pra 200×200 px e repetido. Blend mode screen clareia
+   áreas escuras sem desaturar cores. Seed fixa garante grão determinístico.
+   z-index 1000 fica acima de todo conteúdo; pointer-events: none nunca
+   bloqueia interação. Substitui o .has-noise por seção anterior. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 1000;
+  opacity: 0.085;
+  mix-blend-mode: screen;
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* .has-noise legado — noise agora aplicado globalmente via body::before.
+   Classe mantida como no-op pra manter compatibilidade com o HTML existente. */
+.has-noise { /* intentionally empty */ }
+
+/* -------------------------------------------------------------------------
+   Reset complementar + base
+   ------------------------------------------------------------------------- */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  /* Fallback para anchor scroll iniciado pelo browser (URL direta com #,
+     back/forward, foco por Tab). O JS atualiza --site-header-h a partir
+     do bbox real do .site-header, então o offset acompanha mudanças de
+     breakpoint sem hardcode. */
+  scroll-padding-top: var(--site-header-h, 96px);
+  /* Remove flash azul/cinza padrão de toque em Android Chrome — incompatível
+     com a estética dark premium cinematográfica. Hovers/focos premium são
+     definidos por classe, não por highlight do SO. */
+  -webkit-tap-highlight-color: transparent;
+}
+
+body {
+  margin: 0;
+  background: var(--color-onyx, #0A0A0A);
+  color: var(--color-paper-white, #FFFFFF);
+  font-family: var(--font-body, 'Cormorant Garamond', serif);
+  font-size: 18px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* -------------------------------------------------------------------------
+   Tipografia editorial — utilidades
+   ------------------------------------------------------------------------- */
+
+.font-display {
+  font-family: 'Cinzel', 'Trajan Pro', 'Times New Roman', serif;
+}
+
+.font-body {
+  font-family: 'Cormorant Garamond', 'EB Garamond', Georgia, serif;
+}
+
+.font-ui {
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+.tracking-roman {
+  letter-spacing: 0.1em;
+}
+
+.tracking-roman-wide {
+  letter-spacing: 0.16em;
+}
+
+/* Eyebrow padrão de seção: Cinzel 12px tracking +2px gold uppercase */
+.eyebrow {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #C9A961;
+  display: inline-block;
+}
+
+/* Headline com gradient gold metálico (clipping em texto) */
+.headline-gold {
+  background: linear-gradient(135deg, #E5C77A 0%, #C9A961 35%, #8C6E2B 60%, #C9A961 80%, #E5C77A 100%);
+  -webkit-background-clip: text;
+          background-clip: text;
+  -webkit-text-fill-color: transparent;
+          color: transparent;
+}
+
+/* Linha gold ornamental */
+.divider-gold {
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, #C9A961 50%, transparent 100%);
+  border: 0;
+  margin: 64px 0;
+}
+
+/* Citação Cormorant italic com indicador gold */
+.quote-gold {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #FFFFFF;
+  padding-left: 24px;
+  border-left: 2px solid #C9A961;
+}
+
+/* -------------------------------------------------------------------------
+   Layout
+   ------------------------------------------------------------------------- */
+
+.container-page {
+  max-width: 1280px;
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+@media (min-width: 1024px) {
+  .container-page {
+    padding-inline: 48px;
+  }
+}
+
+.container-ledger {
+  max-width: 720px;
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+.section {
+  padding-block: 80px;
+}
+
+@media (min-width: 1024px) {
+  .section {
+    padding-block: 120px;
+  }
+}
+
+.section-hero {
+  padding-block: 0;
+  min-height: 100vh;
+  position: relative;
+  overflow: hidden;
+}
+
+.section-cta {
+  padding-block: 120px;
+  background-color: #000000;
+}
+
+@media (min-width: 1024px) {
+  .section-cta {
+    padding-block: 160px;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Cinematic Intro Sequence
+   ------------------------------------------------------------------------- */
+
+.intro-stage {
+  position: fixed;
+  inset: 0;
+  background: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  /* Iniciamos visível; main.js esconde se sessionStorage já marcou */
+}
+
+.intro-video {
+  /* Desktop: cobre tela inteira */
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (max-width: 1023px) {
+  /* Mobile: full-bleed estilo YouTube Shorts. O vídeo preenche todo o viewport
+     vertical (9:16+); as bordas horizontais são cortadas por object-fit: cover.
+     A logo HAAS continua no centro do frame, então permanece visível. */
+  .intro-video {
+    width: 100vw;
+    height: 100vh;
+    object-fit: cover;
+    object-position: center;
+  }
+}
+
+/* Skip button — desktop (ghost gold com border) */
+.intro-skip {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  z-index: 110;
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #C9A961;
+  background: transparent;
+  border: 1px solid #C9A961;
+  border-radius: 999px;
+  padding: 12px 20px;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: opacity 200ms cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.intro-skip:hover,
+.intro-skip:focus-visible {
+  opacity: 1;
+  outline: none;
+}
+
+.intro-skip:focus-visible {
+  box-shadow: 0 0 0 2px #E5C77A;
+}
+
+/* Skip button — mobile (minimalista, sem border, hit-area ≥44px) */
+@media (max-width: 1023px) {
+  .intro-skip {
+    bottom: 20px;
+    right: 20px;
+    border: 0;
+    background: transparent;
+    padding: 12px 8px;
+    font-size: 11px;
+    opacity: 0.7;
+    border-radius: 0;
+  }
+
+  .intro-skip:active {
+    opacity: 1;
+  }
+}
+
+/* Indicador de loading durante preload do vídeo */
+.intro-loader {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+  font-family: 'Cinzel', serif;
+  font-size: 60px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  color: #E5C77A;
+  opacity: 0.4;
+  animation: intro-loader-pulse 1.6s ease-in-out infinite;
+}
+
+@keyframes intro-loader-pulse {
+  0%, 100% { opacity: 0.25; }
+  50%      { opacity: 0.5; }
+}
+
+.intro-stage.is-playing .intro-loader,
+.intro-stage.is-done .intro-loader {
+  display: none;
+}
+
+/* Estado final: stage faz fade-out longo + ease-in-out — o próprio overlay
+   preto da intro funciona como camada de "darken" enquanto desaparece, o
+   que mascara qualquer pop-in dos elementos do hero que sobem por baixo.
+   Duração casada com a animação completa de header + hero content (main.js). */
+.intro-stage.is-done {
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 1200ms cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* Quando intro está rodando, esconde scroll do body */
+body.is-intro-locked {
+  overflow: hidden;
+}
+
+/* -------------------------------------------------------------------------
+   Header
+   ------------------------------------------------------------------------- */
+
+.site-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 90;
+  background: rgba(0, 0, 0, 0.7);
+  -webkit-backdrop-filter: blur(16px);
+          backdrop-filter: blur(16px);
+  transition: background 300ms cubic-bezier(0.65, 0, 0.35, 1),
+              transform 600ms cubic-bezier(0.33, 1, 0.68, 1);
+  /* Estado inicial: escondido (para a intro animar a entrada) */
+  transform: translateY(-100%);
+  opacity: 0;
+}
+
+.site-header.is-visible {
+  transform: translateY(0);
+  opacity: 1;
+}
+
+.site-header.is-solid {
+  background: #000000;
+}
+
+.site-header__inner {
+  max-width: 1280px;
+  margin-inline: auto;
+  padding: 16px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+}
+
+@media (min-width: 1024px) {
+  .site-header__inner {
+    padding: 20px 48px;
+  }
+}
+
+.site-header__logo img {
+  height: 40px;
+  width: auto;
+}
+
+@media (min-width: 1024px) {
+  .site-header__logo img {
+    height: 48px;
+  }
+}
+
+.site-nav {
+  display: none;
+}
+
+@media (min-width: 1024px) {
+  .site-nav {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+  }
+}
+
+.site-nav a {
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  transition: color 200ms cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.site-nav a:hover,
+.site-nav a.is-active {
+  color: #C9A961;
+}
+
+/* Mobile menu hamburger + drawer */
+.nav-toggle {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  /* Painel glass com rim gold sutil — alinhado ao Header translúcido
+     do DESIGN.md (backdrop-filter: blur). Faz o botão ter presença física
+     sem competir com a logo, e dá um "alvo" visível pra dedo no mobile. */
+  width: 48px;
+  height: 48px;
+  padding: 0;
+  background: rgba(10, 10, 10, 0.55);
+  -webkit-backdrop-filter: blur(10px) saturate(140%);
+          backdrop-filter: blur(10px) saturate(140%);
+  border: 1px solid rgba(201, 169, 97, 0.4);
+  border-radius: 999px;
+  cursor: pointer;
+  transition: border-color 280ms cubic-bezier(0.33, 1, 0.68, 1),
+              background-color 280ms ease,
+              box-shadow 280ms ease;
+}
+
+.nav-toggle:hover,
+.nav-toggle:focus-visible {
+  border-color: rgba(201, 169, 97, 0.8);
+  background: rgba(10, 10, 10, 0.7);
+  outline: none;
+}
+
+.nav-toggle:focus-visible {
+  box-shadow: 0 0 0 2px rgba(229, 199, 122, 0.4);
+}
+
+/* Estado aberto: rim gold sólido + halo sutil — sinaliza "ativo" mesmo
+   com o drawer abrindo por cima. */
+.nav-toggle.is-open {
+  border-color: #C9A961;
+  background: rgba(20, 14, 6, 0.7);
+  box-shadow: 0 0 0 4px rgba(201, 169, 97, 0.08);
+}
+
+@media (min-width: 1024px) {
+  .nav-toggle {
+    display: none;
+  }
+}
+
+.nav-toggle span {
+  display: block;
+  width: 24px;
+  height: 1.5px;
+  background: #C9A961;
+  transform-origin: center;
+  transition: transform 320ms cubic-bezier(0.65, 0, 0.35, 1),
+              opacity 200ms ease;
+}
+
+/* Hambúrguer → X. Os deslocamentos em Y (±6.5px) batem com gap 5px + altura 1.5px
+   pra as três barras convergirem no centro antes da rotação. */
+.nav-toggle.is-open span:nth-child(1) {
+  transform: translateY(6.5px) rotate(45deg);
+}
+
+.nav-toggle.is-open span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.nav-toggle.is-open span:nth-child(3) {
+  transform: translateY(-6.5px) rotate(-45deg);
+}
+
+.nav-drawer {
+  position: fixed;
+  inset: 0;
+  /* Frosted glass: base cool-dark translúcida (~70% opacidade) deixa a seção
+     do site atrás aparecer só como vestígio borrado; backdrop-filter aplica o
+     medium blur (mesmo padrão do Header — DESIGN.md:267). Tom muito sutilmente
+     esverdeado (rgb 20,25,20) — derivado de #212821 mas mais escuro pra a
+     estética dark do site prevalecer; foco visual fica no texto Cinzel, não
+     no painel de fundo. */
+  background-color: rgba(20, 25, 20, 0.7);
+  -webkit-backdrop-filter: blur(16px) saturate(140%);
+          backdrop-filter: blur(16px) saturate(140%);
+  /* Stack de imagens de fundo, base → top:
+       1) Radial gradient de iluminação sutil — luz gold que nasce no topo-centro
+          do drawer (onde fica o close button) e dissolve antes da metade vertical.
+          Cria profundidade cinematográfica sem brilho explícito.
+       2) Noise SVG (spec do noise effect.md — feTurbulence baseFrequency 0.85,
+          fractalNoise, color matrix forçando opacity 0.22). Repete em tile 200×200. */
+  background-image:
+    radial-gradient(ellipse 90% 55% at 50% 22%, rgba(229, 199, 122, 0.08) 0%, rgba(201, 169, 97, 0.025) 35%, transparent 65%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='240' height='240' viewBox='0 0 240 240'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch' seed='3'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 0.22 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: no-repeat, repeat;
+  background-size: 100% 100%, 200px 200px;
+  /* normal pro gradient (luz aditiva sobre o warm-dark); screen pro noise
+     (clareia áreas escuras sem deslavar a cor, igual ao body::before global). */
+  background-blend-mode: normal, screen;
+  z-index: 95;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 32px;
+  transform: translateX(100%);
+  transition: transform 400ms cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.nav-drawer.is-open {
+  transform: translateX(0);
+}
+
+/* Moldura ornamental gold (MOLDURA 3 do kit do cliente) como overlay decorativo.
+   PNG vertical 9:16 com aspas decorativas, fios gold contornando e a logomarca
+   HAAS no canto inferior direito. A área interna do PNG é transparente, então
+   o background do drawer aparece por dentro do frame.
+
+   pointer-events: none garante que cliques nos links nunca esbarrem na moldura.
+   z-index 0 fica acima do background do drawer mas abaixo dos itens (que ganham
+   z-index 1 abaixo). */
+.nav-drawer::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: url('../images/moldura-drawer.png');
+  /* 100% 100% estica leve em telas mais altas que 9:16, mas como a moldura é
+     composta de retas paralelas e ornamentos simétricos, a distorção é
+     imperceptível. A alternativa (contain + center) deixaria gaps pretos nas
+     bordas em telas 19.5:9, quebrando o efeito de "frame até a borda da tela". */
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  background-position: center;
+  pointer-events: none;
+  z-index: 0;
+  /* Visível desde o início — sem fade-in:
+       1) Garante que o PNG seja carregado pelo browser na primeira render do
+          documento (não há lazy-load condicional por classe).
+       2) Como o ::before é child do .nav-drawer, ele acompanha o transform do
+          swipe-to-open em tempo real. O frame entra junto com o resto do drawer
+          seguindo o dedo, sem aparecer "depois" via opacity transition. */
+  opacity: 0.92;
+}
+
+/* Garantir que close, links e CTA WhatsApp fiquem acima da moldura. */
+.nav-drawer > * {
+  position: relative;
+  z-index: 1;
+}
+
+.nav-drawer a {
+  font-family: 'Cinzel', serif;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #FFFFFF;
+}
+
+.nav-drawer a:hover {
+  color: #C9A961;
+}
+
+/* Entrada escalonada dos itens do drawer.
+   Estado inicial: invisível e empurrado para baixo. Quando .is-open dispara,
+   cada item respeita seu transition-delay para fazer fade-up um a um.
+   O primeiro filho é o botão de fechar; os <a> começam em nth-child(2). */
+.nav-drawer__close,
+.nav-drawer > a {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 400ms cubic-bezier(0.33, 1, 0.68, 1),
+              transform 400ms cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.nav-drawer.is-open .nav-drawer__close,
+.nav-drawer.is-open > a {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.nav-drawer.is-open .nav-drawer__close { transition-delay: 220ms; }
+.nav-drawer.is-open > a:nth-child(2)   { transition-delay: 280ms; }
+.nav-drawer.is-open > a:nth-child(3)   { transition-delay: 340ms; }
+.nav-drawer.is-open > a:nth-child(4)   { transition-delay: 400ms; }
+.nav-drawer.is-open > a:nth-child(5)   { transition-delay: 460ms; }
+.nav-drawer.is-open > a:nth-child(6)   { transition-delay: 520ms; }
+.nav-drawer.is-open > a:nth-child(7)   { transition-delay: 580ms; }
+
+/* Close button — circle gold-rim glass, mesma linguagem visual do .nav-toggle
+   (hamburger) pra criar um par coerente: hamburger no header / close no drawer.
+   Hit-area generoso (48×48), × prominente, rotate-on-hover de 90° pra micro-feedback. */
+.nav-drawer__close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  width: 52px;
+  height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 6, 4, 0.55);
+  -webkit-backdrop-filter: blur(8px) saturate(140%);
+          backdrop-filter: blur(8px) saturate(140%);
+  border: 1px solid rgba(201, 169, 97, 0.45);
+  border-radius: 999px;
+  color: #C9A961;
+  /* × glyph: Cinzel light, line-height 1 pra centrar perfeitamente. Tamanho
+     grande pra o close virar marca visual, não detalhe escondido. */
+  font-family: 'Cinzel', serif;
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 1;
+  padding: 0;
+  cursor: pointer;
+  transition: border-color 280ms cubic-bezier(0.33, 1, 0.68, 1),
+              background-color 280ms ease,
+              color 280ms ease,
+              transform 360ms cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.nav-drawer__close:hover,
+.nav-drawer__close:focus-visible {
+  border-color: #C9A961;
+  background: rgba(20, 14, 6, 0.7);
+  color: #E5C77A;
+  outline: none;
+  /* Rotaciona 90° pra reforçar a intenção de "fechar". O × continua simétrico
+     visualmente, mas o giro responde imediatamente ao toque. */
+  transform: rotate(90deg);
+}
+
+.nav-drawer__close:focus-visible {
+  box-shadow: 0 0 0 2px rgba(229, 199, 122, 0.4);
+}
+
+/* WhatsApp CTA dentro do drawer — segue o padrão gold-solid do DESIGN.md
+   (linhas 309, 359, 375): "WhatsApp pill `gold-solid`". Mesma lógica visual do
+   .btn--gold-solid usado nos CTAs do hero, do header e dos cards.
+   O verde do WhatsApp fica reservado ao FAB (DESIGN.md:421), que já existe no
+   canto inferior direito como atalho funcional. */
+/* Proporção: ícone domina (~24px) e texto vira label compacto (11px Cinzel).
+   Inverte a hierarquia anterior onde o texto sufocava o ícone — agora o pill
+   "lê" como "botão WhatsApp" antes de você terminar de ler o label.
+   Outline composto: rim gold-light fino + ring interno escuro + halo gold sutil
+   = profundidade premium sem virar FAB-mode agressivo. */
+.nav-drawer__cta-whatsapp {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  /* !important neutraliza a regra .nav-drawer a (Cinzel 24px branco) e o
+     hover-gold .nav-drawer a:hover — senão o texto ficaria branco/gold em vez
+     de preto sobre o fundo gold. */
+  color: #000000 !important;
+  background: #C9A961;
+  padding: 12px 24px 12px 18px;
+  border-radius: 999px;
+  margin-top: 24px;
+  /* Outline composto:
+       1) Border 1px gold-light (rim de luz na transição com o frame da moldura).
+       2) Inset shadow no topo (highlight) e fundo (ground line) — dá curvatura.
+       3) Outer halo gold-deep discreto — separa o pill do warm-dark do drawer.
+       4) Aura outer expandida com alpha baixíssimo — premium glow sem virar neon. */
+  border: 1px solid #E5C77A;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.18),
+    0 0 0 1px rgba(167, 138, 75, 0.5),
+    0 6px 18px rgba(0, 0, 0, 0.4),
+    0 0 28px rgba(201, 169, 97, 0.18);
+  /* Largura máxima — pill nunca encosta nos fios gold laterais da moldura. */
+  max-width: min(260px, calc(100% - 120px));
+  box-sizing: border-box;
+  /* Inclui opacity/transform pra entrar coreografado pelo stagger do drawer
+     sem competir. Hover usa background/border-color + box-shadow (sem transform),
+     evitando conflito com o translateY de entrada. */
+  transition: opacity 400ms cubic-bezier(0.33, 1, 0.68, 1),
+              transform 400ms cubic-bezier(0.33, 1, 0.68, 1),
+              background 200ms cubic-bezier(0.65, 0, 0.35, 1),
+              border-color 200ms cubic-bezier(0.65, 0, 0.35, 1),
+              box-shadow 200ms ease;
+}
+
+.nav-drawer__cta-whatsapp:hover,
+.nav-drawer__cta-whatsapp:focus-visible {
+  color: #000000 !important;
+  background: #A78A4B;
+  border-color: #C9A961;
+  outline: none;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.22),
+    0 0 0 1px rgba(201, 169, 97, 0.7),
+    0 8px 24px rgba(0, 0, 0, 0.5),
+    0 0 36px rgba(229, 199, 122, 0.28);
+}
+
+.nav-drawer__cta-whatsapp:focus-visible {
+  outline: 2px solid rgba(229, 199, 122, 0.7);
+  outline-offset: 3px;
+}
+
+.nav-drawer__cta-icon {
+  width: 24px;
+  height: 24px;
+  /* Ícone preto integrado ao texto. Tamanho > texto pra o pill ler como
+     "botão WhatsApp" antes do label. O reconhecimento do canal vem do glifo,
+     não da cor verde (que fica reservada ao FAB). */
+  fill: #000000;
+  flex-shrink: 0;
+}
+
+/* -------------------------------------------------------------------------
+   Hero
+   ------------------------------------------------------------------------- */
+
+.hero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  /* Ancoragem inferior: libera o miolo do hero para a logo central do vídeo
+     de background respirar sem competir com o headline. */
+  align-items: flex-end;
+  overflow: hidden;
+  background: #000000;
+}
+
+/* Vídeo congelado como background do hero — espelha lógica do intro */
+.hero__bg {
+  position: absolute;
+  inset: 0;
+  background: #000000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 0;
+}
+
+.hero__bg video,
+.hero__bg img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: brightness(0.55);
+}
+
+@media (max-width: 1023px) {
+  /* Mobile: full-bleed estilo YouTube Shorts (mesma lógica do intro).
+     O freeze-frame do vídeo preenche todo o hero verticalmente, mantendo
+     a logo central no centro do viewport. */
+  .hero__bg video,
+  .hero__bg img {
+    width: 100vw;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    /* Estado inicial: nítido. O blur entra ACOPLADO ao reveal do hero (.is-revealed),
+       definido por main.js no mesmo tick em que o conteúdo faz fade-up. Curva longa
+       (1200ms) faz o efeito "tela respira e foca no texto" — nunca pop-in.
+       brightness 0.55 → 0.45 reforça a profundidade durante o blur. */
+    filter: brightness(0.55) blur(0px);
+    transition: filter 1200ms cubic-bezier(0.33, 1, 0.68, 1);
+    will-change: filter;
+  }
+
+  .hero.is-revealed .hero__bg video,
+  .hero.is-revealed .hero__bg img {
+    filter: brightness(0.45) blur(12px);
+  }
+}
+
+.hero__content {
+  position: relative;
+  z-index: 1;
+  max-width: 1280px;
+  margin-inline: auto;
+  /* Padding inferior generoso ancora o conteúdo no rodapé do hero,
+     preservando a logo central do vídeo como protagonista visual.
+     O top continua existindo apenas como cushion para o header. */
+  padding: 80px 24px 96px;
+  width: 100%;
+  /* Estado inicial: invisível (entra após intro) */
+  opacity: 0;
+  transform: translateY(24px);
+}
+
+@media (min-width: 1024px) {
+  .hero__content {
+    padding: 96px 48px 120px;
+  }
+}
+
+.hero__content.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 700ms cubic-bezier(0.33, 1, 0.68, 1),
+              transform 700ms cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.hero__eyebrow {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #C9A961;
+  margin: 0 0 32px;
+}
+
+.hero__headline {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  /* Escala reduzida e coluna estreita: o headline vive como uma coluna
+     vertical à esquerda do hero, sem cruzar o eixo central horizontal
+     onde a logo do vídeo de background está fixada. Largura calibrada
+     em 11ch para garantir que nenhuma linha encoste no monograma HAAS. */
+  font-size: clamp(32px, 4.4vw, 60px);
+  /* line-height 1.32: cobre o desenho completo dos acentos altos da Cinzel
+     uppercase (Ê em "EXCELÊNCIA", Í em "JURÍDICA", Ó em "HISTÓRIA").
+     Valores menores deixavam o topo do diacrítico fora da box renderizada. */
+  line-height: 1.32;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  margin: 0 0 28px;
+  max-width: 11ch;
+}
+
+.hero__subtitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  /* Coluna mais estreita para acompanhar o headline ancorado à esquerda —
+     evita que o subtítulo invada o terço central onde a logo do vídeo vive. */
+  font-size: clamp(17px, 1.9vw, 21px);
+  line-height: 1.4;
+  color: #FFFFFF;
+  margin: 0 0 40px;
+  max-width: 42ch;
+}
+
+.hero__ctas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+}
+
+@media (max-width: 1023px) {
+  /* No mobile, decisão de design: botões centralizados horizontalmente,
+     enquanto eyebrow/headline/subtitle permanecem ancorados à esquerda
+     (coluna institucional preservada — fonte: plano aprovado). */
+  .hero__ctas {
+    justify-content: center;
+  }
+
+  /* Pills empilham e respiram dentro da coluna. max-width preserva o pill
+     premium sem esticar feio em telas maiores (tablets em modo retrato). */
+  .hero__ctas .btn {
+    width: 100%;
+    max-width: 320px;
+    justify-content: center;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Buttons
+   ------------------------------------------------------------------------- */
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  padding: 16px 32px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: background 200ms cubic-bezier(0.65, 0, 0.35, 1),
+              color 200ms cubic-bezier(0.65, 0, 0.35, 1),
+              transform 200ms cubic-bezier(0.65, 0, 0.35, 1);
+  text-decoration: none;
+}
+
+.btn--gold-solid {
+  background: #C9A961;
+  color: #000000;
+  border: 1px solid #C9A961;
+}
+
+.btn--gold-solid:hover {
+  background: #A78A4B;
+  border-color: #A78A4B;
+}
+
+.btn--gold-ghost {
+  background: transparent;
+  color: #C9A961;
+  border: 1px solid #C9A961;
+}
+
+.btn--gold-ghost:hover {
+  background: rgba(201, 169, 97, 0.1);
+  color: #E5C77A;
+}
+
+.btn--white-ghost {
+  background: transparent;
+  color: #FFFFFF;
+  border: 1px solid #FFFFFF;
+}
+
+.btn--white-ghost:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+.btn--small {
+  padding: 12px 24px;
+  font-size: 12px;
+}
+
+/* -------------------------------------------------------------------------
+   Service Cards (Áreas de Atuação)
+   ------------------------------------------------------------------------- */
+
+.services-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 24px;
+}
+
+@media (min-width: 768px) {
+  .services-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+  }
+}
+
+.service-card {
+  background: #1A1A1A;
+  border-top: 1px solid #C9A961;
+  border-radius: 4px;
+  padding: 32px 24px;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 300ms cubic-bezier(0.33, 1, 0.68, 1),
+              border-top-color 300ms cubic-bezier(0.33, 1, 0.68, 1),
+              border-top-width 300ms cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+@media (min-width: 1024px) {
+  .service-card {
+    padding: 40px 32px;
+  }
+}
+
+.service-card:hover {
+  transform: translateY(-4px);
+  border-top-color: #A78A4B;
+  border-top-width: 2px;
+  padding-top: 31px;
+}
+
+@media (min-width: 1024px) {
+  .service-card:hover {
+    padding-top: 39px;
+  }
+}
+
+.service-card__icon {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 24px;
+}
+
+.service-card__title {
+  font-family: 'Cinzel', serif;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  margin: 0 0 8px;
+}
+
+.service-card__lawyer {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 16px;
+  color: #8A8A8A;
+  margin: 0 0 24px;
+}
+
+.service-card__desc {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  line-height: 1.5;
+  color: #8A8A8A;
+  margin: 0 0 32px;
+  flex: 1;
+}
+
+.service-card__list {
+  list-style: none;
+  margin: 0 0 32px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.service-card__list li {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #C9A961;
+}
+
+.service-card__link {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #C9A961;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
+}
+
+/* -------------------------------------------------------------------------
+   Section Heading (eyebrow + headline + subtitle)
+   ------------------------------------------------------------------------- */
+
+.section-head {
+  max-width: 720px;
+  margin: 0 auto 80px;
+  text-align: center;
+}
+
+.section-head__eyebrow {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #C9A961;
+  margin: 0 0 24px;
+}
+
+.section-head__title {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: clamp(32px, 5vw, 56px);
+  /* line-height 1.35: o em-box natural da Cinzel (com espaço pros diacríticos
+     altos Ú, Í, Ã, Ê acima da cap-height) tem ratio ~1.33, então o line-box
+     precisa ser pelo menos isso pra acomodar o desenho completo do acento.
+     Valores menores (1.1, 1.22) sangravam o topo do acento acima da box. */
+  line-height: 1.35;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  margin: 0 0 24px;
+}
+
+.section-head__subtitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  line-height: 1.5;
+  color: #8A8A8A;
+  margin: 0;
+}
+
+/* -------------------------------------------------------------------------
+   About — perfis das advogadas
+   ------------------------------------------------------------------------- */
+
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 48px;
+}
+
+@media (min-width: 768px) {
+  .profile-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 64px;
+  }
+}
+
+.profile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.profile__frame {
+  position: relative;
+  width: 280px;
+  height: 280px;
+  margin-bottom: 32px;
+}
+
+.profile__frame img.profile__moldura {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  z-index: 2;
+  pointer-events: none;
+}
+
+.profile__frame img.profile__photo {
+  position: absolute;
+  inset: 14%;
+  width: 72%;
+  height: 72%;
+  object-fit: cover;
+  border-radius: 2px;
+  z-index: 1;
+  background: #1A1A1A;
+}
+
+.profile__placeholder {
+  position: absolute;
+  inset: 14%;
+  width: 72%;
+  height: 72%;
+  background: linear-gradient(135deg, #1A1A1A 0%, #2A2A2A 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Cinzel', serif;
+  font-size: 24px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #C9A961;
+  border-radius: 2px;
+  z-index: 1;
+}
+
+.profile__name {
+  font-family: 'Cinzel', serif;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  margin: 0 0 8px;
+}
+
+.profile__oab {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #8A8A8A;
+  margin: 0 0 16px;
+}
+
+.profile__specialty {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 18px;
+  color: #C9A961;
+  margin: 0 0 24px;
+}
+
+.profile__bio {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #FFFFFF;
+  margin: 0 0 32px;
+}
+
+.profile__link {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #C9A961;
+}
+
+/* -------------------------------------------------------------------------
+   Localização
+   ------------------------------------------------------------------------- */
+
+.location-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 48px;
+  align-items: start;
+}
+
+@media (min-width: 1024px) {
+  .location-grid {
+    grid-template-columns: 1fr 1.4fr;
+    gap: 64px;
+  }
+}
+
+.location-info dl {
+  display: grid;
+  gap: 32px;
+  margin: 0;
+}
+
+.location-info dt {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #C9A961;
+  margin-bottom: 8px;
+}
+
+.location-info dd {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  color: #FFFFFF;
+  margin: 0;
+}
+
+.location-info dd a {
+  color: inherit;
+  border-bottom: 1px solid transparent;
+  transition: border-color 200ms ease;
+}
+
+.location-info dd a:hover {
+  border-bottom-color: #C9A961;
+}
+
+.location-map {
+  width: 100%;
+  height: 400px;
+  border-radius: 4px;
+  border: 1px solid #2A2A2A;
+}
+
+/* -------------------------------------------------------------------------
+   FAQ (details/summary)
+   ------------------------------------------------------------------------- */
+
+.faq {
+  max-width: 800px;
+  margin-inline: auto;
+}
+
+.faq details {
+  border-bottom: 1px solid #C9A961;
+  padding: 24px 0;
+}
+
+.faq details:first-child {
+  border-top: 1px solid #C9A961;
+}
+
+.faq summary {
+  list-style: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  font-family: 'Cinzel', serif;
+  font-size: 18px;
+  font-weight: 600;
+  /* line-height 1.7: garante respiro pro tilde do Ã em "REGIÃO" e demais
+     acentos altos quando a pergunta está em uppercase Cinzel. Sem isso,
+     o align-items:center do flex deixa o acento colado no topo da box. */
+  line-height: 1.7;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  transition: color 200ms ease;
+}
+
+.faq summary::-webkit-details-marker {
+  display: none;
+}
+
+.faq summary::after {
+  content: '+';
+  font-family: 'Cinzel', serif;
+  font-size: 24px;
+  color: #C9A961;
+  flex-shrink: 0;
+  transition: transform 200ms ease;
+}
+
+.faq details[open] summary::after {
+  content: '−';
+}
+
+.faq summary:hover {
+  color: #C9A961;
+}
+
+.faq details > div {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  line-height: 1.6;
+  color: #8A8A8A;
+  padding: 16px 0 0;
+  max-width: 60ch;
+}
+
+/* -------------------------------------------------------------------------
+   CTA Final
+   ------------------------------------------------------------------------- */
+
+.cta-final {
+  text-align: center;
+  background-color: #000000;
+}
+
+.cta-final__title {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: clamp(40px, 6vw, 80px);
+  /* line-height 1.32: mesma lógica do section-head__title — line-box menor
+     que isso (1.0, 1.18) deixava o desenho do acento (Ã, Ê, Í, Ó, Ú) 4-5px
+     acima da box renderizada do título. */
+  line-height: 1.32;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin: 0 0 32px;
+}
+
+.cta-final__subtitle {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: clamp(18px, 2vw, 24px);
+  line-height: 1.4;
+  color: #FFFFFF;
+  margin: 0 auto 48px;
+  max-width: 56ch;
+}
+
+.cta-final__buttons {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 16px;
+}
+
+/* -------------------------------------------------------------------------
+   Footer
+   ------------------------------------------------------------------------- */
+
+.site-footer {
+  background-color: var(--bg-section-default); /* #120C0D — warm-black, alterna com #000 das demais seções */
+  padding: 56px 0 24px;
+  border-top: 1px solid #2A2A2A;
+}
+
+@media (min-width: 1024px) {
+  .site-footer {
+    /* Compactado: era 120px topo. Agora 72px — mantém respiro mas evita rodapé inflado. */
+    padding: 72px 0 24px;
+  }
+}
+
+.site-footer__inner {
+  max-width: 1280px;
+  margin-inline: auto;
+  padding: 0 24px;
+}
+
+@media (min-width: 1024px) {
+  .site-footer__inner {
+    padding: 0 48px;
+  }
+}
+
+.site-footer__logo {
+  text-align: center;
+  margin-bottom: 40px; /* era 64px */
+}
+
+.site-footer__logo img {
+  max-width: 200px; /* era 240px */
+  margin: 0 auto;
+}
+
+@media (min-width: 1024px) {
+  .site-footer__logo img {
+    max-width: 220px; /* era 280px */
+  }
+}
+
+.site-footer__grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px; /* era 48px */
+  margin-bottom: 40px; /* era 64px */
+}
+
+@media (min-width: 768px) {
+  .site-footer__grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 48px; /* era 64px */
+  }
+}
+
+.site-footer__col h3 {
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  color: #C9A961;
+  margin: 0 0 24px;
+}
+
+.site-footer__col ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.site-footer__col a {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  color: #FFFFFF;
+  transition: color 200ms ease;
+}
+
+.site-footer__col a:hover {
+  color: #C9A961;
+}
+
+/* Social links (mask CSS — substituído por SVG inline) */
+.social-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+}
+
+.social-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  color: #C9A961;
+  transition: color 200ms ease;
+}
+
+.social-link svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+.social-link[data-net="whatsapp"]:hover { color: #25D366; }
+.social-link[data-net="instagram"]:hover { color: #E1306C; }
+.social-link[data-net="linkedin"]:hover { color: #0A66C2; }
+.social-link[data-net="jusbrasil"]:hover { color: #1B6ABF; }
+.social-link[data-net="facebook"]:hover { color: #1877F2; }
+
+.site-footer__bottom {
+  border-top: 1px solid #2A2A2A;
+  padding-top: 24px; /* era 32px */
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  text-align: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+@media (min-width: 768px) {
+  .site-footer__bottom {
+    flex-direction: row;
+    justify-content: space-between;
+    text-align: left;
+  }
+}
+
+.site-footer__copyright {
+  color: #8A8A8A;
+  margin: 0;
+}
+
+.site-footer__credit {
+  color: #C9A961;
+  text-decoration: none;
+  transition: color 200ms ease;
+}
+
+.site-footer__credit:hover {
+  color: #FFFFFF;
+}
+
+/* -------------------------------------------------------------------------
+   Mobile FAB + sticky bar
+   ------------------------------------------------------------------------- */
+
+.fab-whatsapp {
+  position: fixed;
+  bottom: 32px;
+  right: 32px;
+  width: 64px;
+  height: 64px;
+  background: #25D366;
+  color: #FFFFFF;
+  border-radius: 999px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.45);
+  z-index: 80;
+  transition: filter 200ms ease, opacity 400ms ease, transform 400ms ease;
+  opacity: 0;
+  transform: translateY(16px);
+  pointer-events: none;
+}
+
+@media (max-width: 767px) {
+  .fab-whatsapp {
+    /* env(safe-area-inset-bottom) protege iPhones com notch/dynamic island —
+       o FAB nunca fica oculto pela home indicator. */
+    bottom: calc(96px + env(safe-area-inset-bottom));
+    right: 16px;
+    width: 56px;
+    height: 56px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
+  }
+}
+
+.fab-whatsapp.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.fab-whatsapp:hover {
+  filter: brightness(1.1);
+}
+
+.fab-whatsapp svg {
+  width: 32px;
+  height: 32px;
+  fill: currentColor;
+}
+
+@media (max-width: 767px) {
+  .fab-whatsapp svg {
+    width: 28px;
+    height: 28px;
+  }
+}
+
+.sticky-cta {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #FFFFFF;
+  padding: 16px;
+  /* max() garante padding mínimo de 16px e respeita a safe-area do iPhone —
+     a barra encosta na home indicator sem cortar o pill button. */
+  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  display: none;
+  justify-content: center;
+  z-index: 81;
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.2);
+  opacity: 0;
+  transform: translateY(100%);
+  transition: opacity 400ms ease, transform 400ms ease;
+  pointer-events: none;
+}
+
+.sticky-cta.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+@media (max-width: 767px) {
+  .sticky-cta {
+    display: flex;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Reveal animations (GSAP fallback CSS-only)
+   ------------------------------------------------------------------------- */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 700ms cubic-bezier(0.33, 1, 0.68, 1),
+              transform 700ms cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* -------------------------------------------------------------------------
+   Authority page (página de autoridade da advogada)
+   ------------------------------------------------------------------------- */
+
+.authority-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 48px;
+}
+
+@media (min-width: 1024px) {
+  .authority-grid {
+    grid-template-columns: 0.8fr 1.2fr;
+    gap: 80px;
+    align-items: start;
+  }
+}
+
+.authority-side {
+  position: sticky;
+  top: 120px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+@media (max-width: 1023px) {
+  .authority-side {
+    position: static;
+  }
+}
+
+.authority-body .subsection {
+  margin-top: 64px;
+}
+
+.authority-body h2 {
+  font-family: 'Cinzel', serif;
+  font-size: 56px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.05;
+  margin: 0 0 32px;
+}
+
+.authority-body h3 {
+  font-family: 'Cinzel', serif;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  margin: 64px 0 24px;
+}
+
+.authority-body p {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 18px;
+  line-height: 1.7;
+  color: #FFFFFF;
+  margin: 0 0 20px;
+  max-width: 60ch;
+}
+
+.authority-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 768px) {
+  .authority-list {
+    grid-template-columns: 1fr 1fr;
+    gap: 16px 32px;
+  }
+}
+
+.authority-list li {
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #C9A961;
+  padding-left: 24px;
+  position: relative;
+  line-height: 1.4;
+}
+
+.authority-list li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: #C9A961;
+}
+
+/* -------------------------------------------------------------------------
+   Blog
+   ------------------------------------------------------------------------- */
+
+.blog-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 32px;
+}
+
+@media (min-width: 768px) {
+  .blog-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.blog-card {
+  background: #1A1A1A;
+  border-bottom: 1px solid #C9A961;
+  border-radius: 4px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 300ms cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.blog-card:hover {
+  transform: translateY(-4px);
+}
+
+.blog-card__date {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #C9A961;
+  margin: 0 0 16px;
+}
+
+.blog-card__title {
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: #FFFFFF;
+  margin: 0 0 16px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.blog-card__excerpt {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #8A8A8A;
+  margin: 0 0 24px;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  flex: 1;
+}
+
+.blog-card__link {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #C9A961;
+  margin-top: auto;
+}
+
+.blog-post {
+  padding: 160px 0 120px;
+}
+
+.blog-post__date {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #C9A961;
+  margin: 0 0 24px;
+}
+
+.blog-post__title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(32px, 5vw, 56px);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 1.1;
+  margin: 0 0 48px;
+}
+
+.blog-post__body p {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  line-height: 1.7;
+  color: #FFFFFF;
+  margin: 0 0 24px;
+}
+
+.blog-post__body h2 {
+  font-family: 'Cinzel', serif;
+  font-size: 32px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  margin: 64px 0 24px;
+}
+
+/* -------------------------------------------------------------------------
+   Reduced motion
+   ------------------------------------------------------------------------- */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .intro-stage {
+    display: none;
+  }
+
+  .site-header {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .hero__content {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Article (blog post) — editorial layout, bento facts, figure, next post
+   ------------------------------------------------------------------------- */
+
+/* Hero editorial — 2 colunas no desktop, texto em cima e cover embaixo no mobile */
+.article-hero {
+  padding: 200px 0 80px;
+  background-color: #000000;
+  position: relative;
+  overflow: hidden;
+}
+
+.article-hero::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(201, 169, 97, 0.4) 50%, transparent 100%);
+  pointer-events: none;
+}
+
+.article-hero__layout {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 56px;
+  align-items: center;
+}
+
+@media (min-width: 900px) {
+  .article-hero__layout {
+    grid-template-columns: minmax(0, 1.4fr) minmax(280px, 0.8fr);
+    gap: 72px;
+  }
+}
+
+.article-hero__crumb {
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #8A8A8A;
+  margin: 0 0 32px;
+}
+
+.article-hero__crumb a {
+  color: #8A8A8A;
+  transition: color 200ms ease;
+}
+
+.article-hero__crumb a:hover {
+  color: #C9A961;
+}
+
+.article-hero__category {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #C9A961;
+  margin: 0 0 24px;
+  display: inline-block;
+}
+
+.article-hero__title {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: clamp(34px, 5.5vw, 64px);
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 1.05;
+  margin: 0 0 32px;
+}
+
+.article-hero__lede {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: clamp(18px, 2vw, 22px);
+  line-height: 1.5;
+  color: #E5E0D4;
+  margin: 0 0 40px;
+  max-width: 56ch;
+}
+
+.article-hero__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: center;
+  font-family: 'Inter', sans-serif;
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #8A8A8A;
+}
+
+.article-hero__meta strong {
+  color: #C9A961;
+  font-weight: 500;
+}
+
+.article-hero__meta span.sep {
+  color: #2A2A2A;
+}
+
+/* Cover (visual lateral) — cartão editorial estilo capa de revista */
+.article-cover {
+  position: relative;
+  aspect-ratio: 3 / 4;
+  border: 1px solid rgba(201, 169, 97, 0.35);
+  background:
+    radial-gradient(ellipse at 50% 40%, rgba(201, 169, 97, 0.10) 0%, transparent 60%),
+    linear-gradient(180deg, #0F0F0F 0%, #050505 100%);
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  padding: 28px;
+  overflow: hidden;
+}
+
+.article-cover::before,
+.article-cover::after {
+  content: '';
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  border: 1px solid #C9A961;
+  pointer-events: none;
+}
+
+.article-cover::before {
+  top: 12px;
+  left: 12px;
+  border-right: 0;
+  border-bottom: 0;
+}
+
+.article-cover::after {
+  bottom: 12px;
+  right: 12px;
+  border-left: 0;
+  border-top: 0;
+}
+
+.article-cover__num {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #C9A961;
+  align-self: start;
+  justify-self: start;
+  z-index: 2;
+}
+
+.article-cover__icon-wrap {
+  display: grid;
+  place-items: center;
+  z-index: 2;
+  padding: 24px 0;
+}
+
+.article-cover__icon {
+  width: 72%;
+  max-width: 200px;
+  filter:
+    brightness(0) saturate(100%)
+    invert(72%) sepia(35%) saturate(450%) hue-rotate(8deg) brightness(95%) contrast(92%)
+    drop-shadow(0 6px 24px rgba(201, 169, 97, 0.25));
+  opacity: 0.92;
+}
+
+.article-cover__sig {
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: #C9A961;
+  align-self: end;
+  justify-self: end;
+  z-index: 2;
+}
+
+/* Article body wrapper — full-bleed escuro, conteúdo em ledger */
+.article-body {
+  padding: 96px 0 64px;
+  background-color: #120C0D;
+}
+
+.article-body__inner {
+  max-width: 720px;
+  margin-inline: auto;
+  padding-inline: 24px;
+}
+
+.article-body p {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  line-height: 1.7;
+  color: #F2EFE8;
+  margin: 0 0 28px;
+}
+
+.article-body p strong {
+  color: #FFFFFF;
+  font-weight: 600;
+}
+
+.article-body p a {
+  color: #C9A961;
+  border-bottom: 1px solid rgba(201, 169, 97, 0.4);
+  transition: border-color 200ms ease, color 200ms ease;
+}
+
+.article-body p a:hover {
+  color: #E5C77A;
+  border-bottom-color: #E5C77A;
+}
+
+.article-body__lede {
+  font-size: 24px !important;
+  line-height: 1.55 !important;
+  color: #FFFFFF !important;
+  font-weight: 500;
+  letter-spacing: 0.005em;
+}
+
+.article-body h2 {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  margin: 72px 0 28px;
+  position: relative;
+  padding-left: 24px;
+}
+
+.article-body h2::before {
+  content: '';
+  position: absolute;
+  top: 0.55em;
+  left: 0;
+  width: 14px;
+  height: 1px;
+  background: #C9A961;
+}
+
+.article-body h3 {
+  font-family: 'Cinzel', serif;
+  font-size: 18px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #C9A961;
+  margin: 40px 0 16px;
+}
+
+.article-body ul,
+.article-body ol {
+  margin: 0 0 28px;
+  padding: 0;
+  list-style: none;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 20px;
+  line-height: 1.7;
+  color: #F2EFE8;
+}
+
+.article-body ul li,
+.article-body ol li {
+  padding: 0 0 12px 32px;
+  position: relative;
+}
+
+.article-body ul li::before {
+  content: '→';
+  position: absolute;
+  left: 0;
+  color: #C9A961;
+  font-weight: 600;
+}
+
+.article-body ol {
+  counter-reset: art;
+}
+
+.article-body ol li {
+  counter-increment: art;
+}
+
+.article-body ol li::before {
+  content: counter(art, decimal-leading-zero);
+  position: absolute;
+  left: 0;
+  top: 0.05em;
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: #C9A961;
+}
+
+.article-body blockquote {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 26px;
+  line-height: 1.45;
+  color: #FFFFFF;
+  padding: 24px 0 24px 28px;
+  border-left: 2px solid #C9A961;
+  margin: 48px 0;
+}
+
+.article-body blockquote footer {
+  display: block;
+  margin-top: 16px;
+  font-family: 'Inter', sans-serif;
+  font-style: normal;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #C9A961;
+}
+
+/* Bento de "fatos rápidos" — 2 colunas mobile, 4 colunas desktop */
+.facts-bento {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin: 48px 0 56px;
+}
+
+@media (min-width: 768px) {
+  .facts-bento {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+}
+
+.fact-card {
+  background: linear-gradient(180deg, #1A1614 0%, #0E0A09 100%);
+  border: 1px solid rgba(201, 169, 97, 0.2);
+  border-radius: 4px;
+  padding: 24px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 132px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color 300ms cubic-bezier(0.33, 1, 0.68, 1),
+              transform 300ms cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.fact-card::before {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, #C9A961 50%, transparent 100%);
+  opacity: 0.4;
+}
+
+.fact-card:hover {
+  border-color: rgba(201, 169, 97, 0.55);
+  transform: translateY(-2px);
+}
+
+.fact-card__number {
+  font-family: 'Cinzel', serif;
+  font-weight: 700;
+  font-size: clamp(32px, 4vw, 44px);
+  line-height: 1;
+  letter-spacing: 0.02em;
+  color: #E5C77A;
+  background: linear-gradient(135deg, #E5C77A 0%, #C9A961 50%, #A78A4B 100%);
+  -webkit-background-clip: text;
+          background-clip: text;
+  -webkit-text-fill-color: transparent;
+          color: transparent;
+}
+
+.fact-card__label {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #B8B0A0;
+  line-height: 1.4;
+}
+
+/* Inline figure — moldura editorial estilo placa de bronze */
+.article-figure {
+  margin: 56px 0;
+}
+
+.article-figure__frame {
+  position: relative;
+  background:
+    radial-gradient(ellipse at center, rgba(201, 169, 97, 0.08) 0%, transparent 70%),
+    #0A0A0A;
+  border: 1px solid rgba(201, 169, 97, 0.35);
+  padding: 56px 32px;
+  display: grid;
+  place-items: center;
+  min-height: 220px;
+  overflow: hidden;
+}
+
+.article-figure__frame::before,
+.article-figure__frame::after {
+  content: '';
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border: 1px solid #C9A961;
+  pointer-events: none;
+}
+
+.article-figure__frame::before {
+  top: 10px;
+  left: 10px;
+  border-right: 0;
+  border-bottom: 0;
+}
+
+.article-figure__frame::after {
+  bottom: 10px;
+  right: 10px;
+  border-left: 0;
+  border-top: 0;
+}
+
+.article-figure__icon {
+  width: 96px;
+  height: 96px;
+  filter:
+    brightness(0) saturate(100%)
+    invert(72%) sepia(35%) saturate(450%) hue-rotate(8deg) brightness(95%) contrast(92%)
+    drop-shadow(0 4px 18px rgba(201, 169, 97, 0.3));
+  margin-bottom: 24px;
+}
+
+.article-figure__title {
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: #C9A961;
+  text-align: center;
+  margin: 0;
+}
+
+.article-figure__caption {
+  margin-top: 16px;
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #8A8A8A;
+  text-align: center;
+}
+
+/* FAQ accordion no corpo do artigo */
+.article-faq {
+  margin: 32px 0 0;
+  border-top: 1px solid rgba(201, 169, 97, 0.2);
+}
+
+.article-faq details {
+  border-bottom: 1px solid rgba(201, 169, 97, 0.2);
+  padding: 0;
+}
+
+.article-faq summary {
+  list-style: none;
+  cursor: pointer;
+  padding: 28px 40px 28px 0;
+  position: relative;
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: #FFFFFF;
+  transition: color 200ms ease;
+}
+
+.article-faq summary::-webkit-details-marker { display: none; }
+
+.article-faq summary::after {
+  content: '+';
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-family: 'Cinzel', serif;
+  font-size: 24px;
+  color: #C9A961;
+  transition: transform 200ms ease, content 200ms ease;
+}
+
+.article-faq details[open] summary::after {
+  content: '−';
+}
+
+.article-faq summary:hover { color: #C9A961; }
+
+.article-faq details > p {
+  padding: 0 0 28px;
+  margin: -8px 0 0;
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 19px;
+  line-height: 1.6;
+  color: #B8B0A0;
+}
+
+/* Próximo artigo — card de navegação cinematográfico */
+.next-article {
+  margin-top: 96px;
+  padding-top: 56px;
+  border-top: 1px solid rgba(201, 169, 97, 0.3);
+}
+
+.next-article__eyebrow {
+  font-family: 'Cinzel', serif;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: #C9A961;
+  margin: 0 0 28px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.next-article__eyebrow::before {
+  content: '';
+  width: 24px;
+  height: 1px;
+  background: #C9A961;
+}
+
+.next-article__card {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 24px;
+  padding: 32px;
+  background: linear-gradient(135deg, #1A1614 0%, #0E0A09 100%);
+  border: 1px solid rgba(201, 169, 97, 0.25);
+  border-radius: 4px;
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 300ms cubic-bezier(0.33, 1, 0.68, 1),
+              transform 300ms cubic-bezier(0.33, 1, 0.68, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.next-article__card::after {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 1px;
+  background: linear-gradient(90deg, #C9A961 0%, transparent 100%);
+  transform: translateX(-100%);
+  transition: transform 600ms cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+.next-article__card:hover {
+  border-color: rgba(201, 169, 97, 0.6);
+  transform: translateY(-2px);
+}
+
+.next-article__card:hover::after {
+  transform: translateX(0);
+}
+
+.next-article__card-body { min-width: 0; }
+
+.next-article__category {
+  font-family: 'Inter', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: #C9A961;
+  margin: 0 0 12px;
+}
+
+.next-article__title {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(18px, 2.2vw, 24px);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  line-height: 1.2;
+  color: #FFFFFF;
+  margin: 0 0 12px;
+}
+
+.next-article__excerpt {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 17px;
+  line-height: 1.5;
+  color: #B8B0A0;
+  margin: 0;
+  max-width: 56ch;
+}
+
+.next-article__arrow {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid #C9A961;
+  display: grid;
+  place-items: center;
+  font-family: 'Cinzel', serif;
+  font-size: 22px;
+  color: #C9A961;
+  flex-shrink: 0;
+  transition: background-color 300ms ease, color 300ms ease;
+}
+
+.next-article__card:hover .next-article__arrow {
+  background-color: #C9A961;
+  color: #0A0A0A;
+}
+
+@media (max-width: 640px) {
+  .next-article__card {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .next-article__arrow {
+    justify-self: start;
+  }
+}
+
+/* Reduced motion respeitado para hovers e transições do artigo */
+@media (prefers-reduced-motion: reduce) {
+  .fact-card,
+  .next-article__card,
+  .next-article__arrow {
+    transition: none !important;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Mobile fine-tuning final — Cinzel tracking e respeito a reduced-motion
+   para as novas animações de hero blur, nav-toggle e drawer stagger.
+   ------------------------------------------------------------------------- */
+
+/* Cinzel em uppercase com tracking largo (0.04em+) vira "labirinto de letras"
+   em telas estreitas. Reduzimos o tracking só nos elementos editoriais grandes,
+   mantendo o tracking institucional nos labels Cinzel pequenos (eyebrows). */
+@media (max-width: 640px) {
+  .hero__headline,
+  .article-hero__title,
+  .blog-card__title,
+  .next-article__title,
+  .article-body h2 {
+    letter-spacing: 0.018em;
+  }
+
+  /* Eyebrows/categorias mantêm tracking espaçado, mas reduzido pra caber melhor.
+     Preserva o caráter "label institucional" sem causar quebras visuais. */
+  .hero__eyebrow,
+  .article-hero__category {
+    letter-spacing: 0.18em;
+  }
+}
+
+/* Reduced-motion: zera transições das novas peças coreografadas. Os estados
+   finais (hero revelado, drawer aberto, toggle como X) continuam sendo aplicados
+   instantaneamente — sem animação, mas com o resultado correto. */
+@media (prefers-reduced-motion: reduce) {
+  .hero__bg video,
+  .hero__bg img,
+  .nav-toggle span,
+  .nav-drawer__close,
+  .nav-drawer > a {
+    transition: none !important;
+  }
+  .nav-drawer.is-open .nav-drawer__close,
+  .nav-drawer.is-open > a {
+    transition-delay: 0ms !important;
+  }
+}
