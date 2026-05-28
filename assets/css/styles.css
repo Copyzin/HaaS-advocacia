@@ -1017,6 +1017,7 @@ body.is-intro-locked {
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  line-height: 1.32;
   color: #FFFFFF;
   margin: 0 0 8px;
 }
@@ -1803,7 +1804,7 @@ body.is-intro-locked {
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  line-height: 1.2;
+  line-height: 1.32;
   color: #FFFFFF;
   margin: 0 0 16px;
   display: -webkit-box;
@@ -1977,7 +1978,7 @@ body.is-intro-locked {
   font-size: clamp(34px, 5.5vw, 64px);
   letter-spacing: 0.02em;
   text-transform: uppercase;
-  line-height: 1.05;
+  line-height: 1.32;
   margin: 0 0 32px;
 }
 
