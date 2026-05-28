@@ -43,6 +43,25 @@
   const hasScrollTrigger = () => hasGSAP() && typeof window.ScrollTrigger !== 'undefined';
 
   /* -----------------------------------------------------------------------
+     SCROLL THROTTLE — um único listener rAF compartilhado para handlers de
+     scroll (header solid, mobile FAB/sticky). Evita rodar callbacks 60+/s
+     em mobile, prevenindo jank e overhead de bateria.
+     ----------------------------------------------------------------------- */
+  let _scrollRaf = 0;
+  const _scrollCallbacks = new Set();
+  function onScrollThrottled(cb) {
+    _scrollCallbacks.add(cb);
+    cb();
+  }
+  window.addEventListener('scroll', () => {
+    if (_scrollRaf) return;
+    _scrollRaf = requestAnimationFrame(() => {
+      _scrollRaf = 0;
+      _scrollCallbacks.forEach((cb) => cb());
+    });
+  }, { passive: true });
+
+  /* -----------------------------------------------------------------------
      CINEMATIC INTRO SEQUENCE
      ----------------------------------------------------------------------- */
 
@@ -333,8 +352,7 @@
       }
     };
 
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
+    onScrollThrottled(onScroll);
   }
 
   /* -----------------------------------------------------------------------
@@ -358,8 +376,7 @@
       });
     };
 
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
+    onScrollThrottled(onScroll);
     window.addEventListener('resize', onScroll, { passive: true });
   }
 
