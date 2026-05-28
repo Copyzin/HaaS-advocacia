@@ -2606,3 +2606,45 @@ body.is-intro-locked {
     transition-delay: 0ms !important;
   }
 }
+
+/* -------------------------------------------------------------------------
+   Touch devices — neutraliza efeitos :hover para evitar "sticky state"
+
+   Em devices sem hover real (touchscreens), o tap dispara :hover e o estado
+   persiste até o usuário tocar em outro lugar — visualmente parece um bug.
+   Aqui revertemos as propriedades dos :hover críticos (transforms, bg, border,
+   filter, padding) quando o device declara hover: none, preservando intenção
+   visual mas sem grudar. :focus-visible (teclado) continua funcionando
+   normalmente pois não é alvo desta regra.
+   ------------------------------------------------------------------------- */
+@media (hover: none) {
+  .btn--gold-solid:hover,
+  .btn--gold-ghost:hover,
+  .btn--white-ghost:hover,
+  .service-card:hover,
+  .blog-card:hover,
+  .fact-card:hover,
+  .next-article__card:hover,
+  .next-article__card:hover .next-article__arrow,
+  .fab-whatsapp:hover,
+  .nav-toggle:hover,
+  .nav-drawer__close:hover,
+  .nav-drawer__cta-whatsapp:hover {
+    background: revert;
+    background-color: revert;
+    color: revert;
+    border-color: revert;
+    border-top-color: revert;
+    border-top-width: revert;
+    border-bottom-color: revert;
+    box-shadow: revert;
+    filter: revert;
+    transform: revert;
+    padding: revert;
+    padding-top: revert;
+  }
+
+  .next-article__card:hover::after {
+    transform: translateX(-100%);
+  }
+}
