@@ -59,7 +59,8 @@
     // pra garantir que, ao final da intro, o usuário SEMPRE acorda no hero.
     try { history.scrollRestoration = 'manual'; } catch (err) {}
 
-    const alreadySeen = sessionStorage.getItem(STORAGE_KEY) === '1';
+    let alreadySeen = false;
+    try { alreadySeen = sessionStorage.getItem(STORAGE_KEY) === '1'; } catch (err) {}
     const reloaded = isPageReload();
     // Hash que aponta pra uma seção real da página atual (ex: #sobre, #servicos).
     // Comportamento desejado:
