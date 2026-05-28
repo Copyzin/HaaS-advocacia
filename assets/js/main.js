@@ -16,7 +16,16 @@
   'use strict';
 
   const STORAGE_KEY = 'haas_intro_seen';
-  const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // REDUCED_MOTION é avaliado live: usuário pode trocar a preferência do SO
+  // no meio da sessão (ex.: Settings → Accessibility no Android/iOS) e o site
+  // precisa reagir sem reload. Mantido como `let` para permitir update do listener.
+  let REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  try {
+    const _rmqMql = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const _rmqOnChange = (e) => { REDUCED_MOTION = e.matches; };
+    if (_rmqMql.addEventListener) _rmqMql.addEventListener('change', _rmqOnChange);
+    else if (_rmqMql.addListener) _rmqMql.addListener(_rmqOnChange); // Safari 13- fallback
+  } catch (err) {}
 
   // F5 / Ctrl+R / Ctrl+Shift+R sempre tocam a intro de novo.
   // Navegação interna (link clicado, back/forward) respeita o gate.
