@@ -690,16 +690,29 @@
     if (e.key === 'Escape') closeModal();
   });
 
+  // Força recarregamento do styles.css sem cache do browser — assim qualquer
+  // edição que você fizer em assets/css/styles.css aparece imediatamente após
+  // recarregar a página, sem precisar Ctrl+Shift+R.
+  function bustCssCache() {
+    try {
+      const idoc = iframe.contentDocument;
+      if (!idoc) return;
+      const link = idoc.querySelector('link[href*="styles.css"]');
+      if (!link) return;
+      const base = link.href.split('?')[0];
+      link.href = base + '?_=' + Date.now();
+    } catch (e) {}
+  }
+
   // ---------- Init ----------
   renderUI();
   iframe.addEventListener('load', () => {
     try {
-      // Reforça gate caso o iframe seja recarregado
       iframe.contentWindow.sessionStorage.setItem('haas_intro_seen', '1');
     } catch (e) {}
-    applyAll();
-    // Abre o drawer automaticamente após 800ms pra mostrar o resultado de cara
-    setTimeout(openDrawer, 800);
+    bustCssCache();
+    // Aguarda o CSS fresco assentar antes de aplicar tokens + abrir drawer
+    setTimeout(() => { applyAll(); openDrawer(); }, 400);
   });
 })();
 </script>
