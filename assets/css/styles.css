@@ -44,13 +44,13 @@
 :root {
   /* ---------- Cores / contraste ---------- */
   /* Painel */
-  --drawer-bg: rgba(20, 25, 20, 0.7);
-  --drawer-blur: 16px;
-  --drawer-saturate: 140%;
-  --drawer-moldura-opacity: 0.92;
+  --drawer-bg: rgba(0, 0, 0, 0.78);
+  --drawer-blur: 7px;
+  --drawer-saturate: 165%;
+  --drawer-moldura-opacity: 0.94;
 
   /* Links de navegação */
-  --drawer-link-color: #FFFFFF;
+  --drawer-link-color: #F2F2F2;
   --drawer-link-color-hover: #C9A961;
 
   /* Botão de fechar (×) */
@@ -79,9 +79,9 @@
   --drawer-close-size: 32px;
 
   /* CTA WhatsApp */
-  --drawer-cta-size: 11px;
-  --drawer-cta-weight: 600;
-  --drawer-cta-tracking: 0.22em;
+  --drawer-cta-size: 14px;
+  --drawer-cta-weight: 800;
+  --drawer-cta-tracking: 0.02em;
 
   /* ---------- Layout / espaçamento ---------- */
   --drawer-gap: 32px;
