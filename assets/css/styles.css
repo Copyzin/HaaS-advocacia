@@ -305,6 +305,74 @@ a {
   }
 }
 
+/* Audio toggle — top-right corner (padrão de brand films premium: separa
+   controle de mídia do skip que fica em bottom-right).
+   Estado default: muted (autoplay garantido). Click libera o áudio. */
+.intro-audio {
+  position: fixed;
+  top: 32px;
+  right: 32px;
+  z-index: 110;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  border: 1px solid #C9A961;
+  border-radius: 999px;
+  background: transparent;
+  color: #C9A961;
+  opacity: 0.6;
+  cursor: pointer;
+  transition: opacity 200ms cubic-bezier(0.33, 1, 0.68, 1),
+              box-shadow 200ms ease;
+}
+
+.intro-audio:hover,
+.intro-audio:focus-visible {
+  opacity: 1;
+  outline: none;
+}
+
+.intro-audio:focus-visible {
+  box-shadow: 0 0 0 2px #E5C77A;
+}
+
+.intro-audio__icon {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+  transition: opacity 180ms ease;
+}
+
+/* Default state: muted (mostra ícone --off, esconde --on) */
+.intro-audio .intro-audio__icon--off { opacity: 1; }
+.intro-audio .intro-audio__icon--on  { opacity: 0; }
+
+/* Após ativar som (.is-on no botão): inverte */
+.intro-audio.is-on .intro-audio__icon--off { opacity: 0; }
+.intro-audio.is-on .intro-audio__icon--on  { opacity: 1; }
+
+/* Audio toggle — mobile (minimalista, sem border, respeita safe-area do notch/Dynamic Island) */
+@media (max-width: 1023px) {
+  .intro-audio {
+    top: calc(20px + env(safe-area-inset-top, 0px));
+    right: 20px;
+    border: 0;
+    background: transparent;
+    padding: 10px;
+    min-height: 44px;
+    min-width: 44px;
+    opacity: 0.7;
+  }
+
+  .intro-audio:active {
+    opacity: 1;
+  }
+}
+
 /* Indicador de loading durante preload do vídeo */
 .intro-loader {
   position: absolute;

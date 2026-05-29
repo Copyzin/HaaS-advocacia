@@ -16,6 +16,7 @@
   'use strict';
 
   const STORAGE_KEY = 'haas_intro_seen';
+  const AUDIO_KEY = 'haas_intro_audio';
   // REDUCED_MOTION é avaliado live: usuário pode trocar a preferência do SO
   // no meio da sessão (ex.: Settings → Accessibility no Android/iOS) e o site
   // precisa reagir sem reload. Mantido como `let` para permitir update do listener.
@@ -78,10 +79,41 @@
     const stage = $('.intro-stage');
     const video = $('.intro-video');
     const skip = $('.intro-skip');
+    const audioBtn = $('.intro-audio');
     const header = $('.site-header');
     const heroContent = $('.hero__content');
     const heroBg = $('.hero__bg');
     const body = document.body;
+
+    // Estado do áudio (mute/unmute toggle). Default: muted (autoplay funciona).
+    // Persistido em sessionStorage pra sobreviver a F5 dentro da sessão.
+    function setAudioState(on, persist) {
+      if (!video) return;
+      video.muted = !on;
+      if (audioBtn) {
+        audioBtn.classList.toggle('is-on', on);
+        audioBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
+        audioBtn.setAttribute('aria-label', on ? 'Silenciar intro' : 'Ativar som da intro');
+      }
+      if (persist) {
+        try {
+          if (on) sessionStorage.setItem(AUDIO_KEY, 'on');
+          else sessionStorage.removeItem(AUDIO_KEY);
+        } catch (err) {}
+      }
+    }
+
+    if (audioBtn) {
+      audioBtn.addEventListener('click', () => {
+        setAudioState(video.muted, true);
+      });
+      audioBtn.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          setAudioState(video.muted, true);
+        }
+      });
+    }
 
     // No F5, navegadores tentam restaurar a posição anterior — bloqueamos isso
     // pra garantir que, ao final da intro, o usuário SEMPRE acorda no hero.
@@ -161,11 +193,16 @@
       forceScrollToHero();
 
       requestAnimationFrame(() => {
-        // Esconde skip com fade próprio
+        // Esconde skip + audio button com fade próprio
         if (skip) {
           skip.style.transition = 'opacity 300ms ease-out';
           skip.style.opacity = '0';
           skip.style.pointerEvents = 'none';
+        }
+        if (audioBtn) {
+          audioBtn.style.transition = 'opacity 300ms ease-out';
+          audioBtn.style.opacity = '0';
+          audioBtn.style.pointerEvents = 'none';
         }
 
         // Stage fade-out longo (1200ms via CSS) — funciona como camada de
@@ -198,6 +235,15 @@
           finish();
         });
       }
+      // Se na sessão anterior o usuário ativou som, tenta reativar agora.
+      // O browser pode reverter pra muted silenciosamente em alguns casos —
+      // se acontecer, o botão continua mostrando o estado off e o usuário
+      // clica de novo. Sem panic, sem erro.
+      try {
+        if (sessionStorage.getItem(AUDIO_KEY) === 'on') {
+          setAudioState(true, false);
+        }
+      } catch (err) {}
     };
 
     if (video.readyState >= 3) {
