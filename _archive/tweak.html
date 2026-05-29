@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HAAS — Drawer Tweak Studio</title>
+  <meta name="robots" content="noindex,nofollow">
+
+  <!--
+    DRAWER TWEAK STUDIO — ferramenta de desenvolvimento temporária.
+
+    O que é: painel de sliders + color pickers + inputs com preview ao vivo
+    do nav-drawer mobile do site HAAS. Mexa nos controles à esquerda, veja
+    o resultado no iframe mobile à direita. Quando estiver satisfeito,
+    clique "Copiar CSS" para extrair o bloco :root pronto para colar no
+    styles.css.
+
+    Como rodar: `python -m http.server 5173` na raiz do projeto, depois
+    abrir http://localhost:5173/tweak.html no Chrome.
+
+    Como remover (quando o tweak final estiver no styles.css):
+      1) Deletar este arquivo (tweak.html).
+      2) Pronto. Nenhum outro arquivo referencia este; nenhuma dependência
+         residual. Site funciona idêntico.
+
+    O painel pré-define sessionStorage.haas_intro_seen='1' antes de carregar
+    o iframe, pulando a Cinematic Intro Sequence — assim o drawer fica
+    acessível imediatamente sem precisar esperar a animação de entrada.
+  -->
+
+  <script>
+    /* Skip intro no iframe — sessionStorage é compartilhado entre top-level
+       window e iframes same-origin. Roda ANTES do iframe carregar. */
+    try { sessionStorage.setItem('haas_intro_seen', '1'); } catch (e) {}
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --tweak-bg: #0A0A0A;
+      --tweak-panel: #141414;
+      --tweak-border: rgba(201, 169, 97, 0.22);
+      --tweak-border-strong: rgba(201, 169, 97, 0.6);
+      --tweak-text: #F5F1E8;
+      --tweak-muted: #8A8A8A;
+      --tweak-gold: #C9A961;
+      --tweak-gold-light: #E5C77A;
+      --tweak-gold-deep: #A78A4B;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+    html, body { margin: 0; padding: 0; height: 100%; }
+    body {
+      font-family: 'Inter', system-ui, sans-serif;
+      background: var(--tweak-bg);
+      color: var(--tweak-text);
+      display: grid;
+      grid-template-columns: 440px 1fr;
+      height: 100vh;
+      overflow: hidden;
+      font-size: 14px;
+    }
+
+    /* ===== PAINEL ===== */
+    .panel {
+      background: var(--tweak-panel);
+      border-right: 1px solid var(--tweak-border);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+    }
+    .panel__head {
+      position: sticky;
+      top: 0;
+      background: var(--tweak-panel);
+      border-bottom: 1px solid var(--tweak-border);
+      padding: 24px 24px 16px;
+      z-index: 10;
+    }
+    .panel__title {
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--tweak-gold);
+      margin: 0 0 6px;
+    }
+    .panel__subtitle {
+      font-size: 12px;
+      line-height: 1.5;
+      color: var(--tweak-muted);
+      margin: 0;
+    }
+    .panel__body { padding: 16px 24px 0; }
+
+    .group {
+      margin-bottom: 28px;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--tweak-border);
+    }
+    .group:last-of-type { border-bottom: 0; }
+    .group__title {
+      font-family: 'Cinzel', serif;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--tweak-gold-light);
+      margin: 0 0 14px;
+    }
+
+    .field { margin-bottom: 14px; }
+    .field__row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin-bottom: 6px;
+    }
+    .field__label {
+      font-size: 12px;
+      color: var(--tweak-text);
+      font-weight: 500;
+    }
+    .field__value {
+      font-family: 'JetBrains Mono', ui-monospace, Consolas, monospace;
+      font-size: 11px;
+      color: var(--tweak-gold);
+      max-width: 60%;
+      text-align: right;
+      word-break: break-all;
+    }
+    .field__controls {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+    }
+
+    /* Inputs */
+    input[type="range"] {
+      flex: 1;
+      accent-color: var(--tweak-gold);
+      height: 22px;
+      background: transparent;
+    }
+    input[type="color"] {
+      width: 40px;
+      height: 28px;
+      border: 1px solid var(--tweak-border);
+      background: transparent;
+      cursor: pointer;
+      padding: 0;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    input[type="text"], select {
+      flex: 1;
+      background: #050505;
+      color: var(--tweak-text);
+      border: 1px solid var(--tweak-border);
+      padding: 7px 9px;
+      font-size: 12px;
+      font-family: inherit;
+      border-radius: 2px;
+    }
+    input[type="text"]:focus, select:focus {
+      outline: none;
+      border-color: var(--tweak-gold);
+    }
+
+    .alpha-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex: 1;
+    }
+    .alpha-row__label {
+      font-size: 10px;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--tweak-muted);
+      min-width: 32px;
+    }
+
+    /* ===== AÇÕES ===== */
+    .actions {
+      position: sticky;
+      bottom: 0;
+      background: var(--tweak-panel);
+      border-top: 1px solid var(--tweak-border);
+      padding: 14px 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    button {
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      padding: 11px 12px;
+      background: transparent;
+      border: 1px solid var(--tweak-gold);
+      color: var(--tweak-gold);
+      cursor: pointer;
+      border-radius: 2px;
+      transition: background 200ms ease, color 200ms ease, border-color 200ms ease;
+    }
+    button:hover {
+      background: var(--tweak-gold);
+      color: #000;
+    }
+    button.primary {
+      background: var(--tweak-gold);
+      color: #000;
+    }
+    button.primary:hover {
+      background: var(--tweak-gold-light);
+      border-color: var(--tweak-gold-light);
+    }
+    button.is-success {
+      background: #2D5A3D;
+      border-color: #4A8A5C;
+      color: #C7F0D2;
+    }
+
+    /* ===== PREVIEW ===== */
+    .preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: #050505;
+      position: relative;
+      padding: 40px;
+      gap: 16px;
+    }
+    .preview__head {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      font-family: 'Cinzel', serif;
+      font-size: 10px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--tweak-muted);
+    }
+    .preview__head strong { color: var(--tweak-gold); font-weight: 600; }
+    .preview__frame {
+      width: 390px;
+      height: 844px;
+      max-height: calc(100vh - 160px);
+      border: 1px solid var(--tweak-border);
+      background: #000;
+      position: relative;
+      box-shadow: 0 0 80px rgba(201, 169, 97, 0.08), 0 20px 60px rgba(0, 0, 0, 0.6);
+      border-radius: 28px;
+      overflow: hidden;
+    }
+    .preview__frame iframe {
+      width: 100%;
+      height: 100%;
+      border: 0;
+      display: block;
+    }
+    .preview__notch {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 130px;
+      height: 26px;
+      background: #000;
+      border-radius: 0 0 18px 18px;
+      z-index: 2;
+      pointer-events: none;
+    }
+    .preview__meta {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--tweak-muted);
+    }
+
+    /* ===== MODAL CSS EXPORT ===== */
+    .modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.86);
+      backdrop-filter: blur(12px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+      padding: 40px;
+    }
+    .modal.is-open { display: flex; }
+    .modal__box {
+      background: var(--tweak-panel);
+      border: 1px solid var(--tweak-border-strong);
+      border-radius: 4px;
+      padding: 28px;
+      max-width: 720px;
+      width: 100%;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .modal__title {
+      font-family: 'Cinzel', serif;
+      font-size: 13px;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--tweak-gold);
+      margin: 0;
+    }
+    .modal__pre {
+      background: #050505;
+      border: 1px solid var(--tweak-border);
+      padding: 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      line-height: 1.6;
+      color: var(--tweak-text);
+      overflow: auto;
+      flex: 1;
+      white-space: pre;
+      border-radius: 2px;
+    }
+    .modal__actions {
+      display: flex;
+      gap: 8px;
+      justify-content: flex-end;
+    }
+
+    /* Responsive fallback */
+    @media (max-width: 960px) {
+      body { grid-template-columns: 1fr; grid-template-rows: 50vh 50vh; }
+      .panel { border-right: 0; border-bottom: 1px solid var(--tweak-border); }
+      .preview { padding: 20px; }
+      .preview__frame { width: 320px; height: auto; max-height: calc(50vh - 80px); }
+    }
+  </style>
+</head>
+<body>
+
+<aside class="panel">
+  <div class="panel__head">
+    <h1 class="panel__title">Drawer Tweak Studio</h1>
+    <p class="panel__subtitle">Mexa nos controles, veja o resultado ao vivo no preview mobile à direita. Quando estiver satisfeito, clique <strong style="color: var(--tweak-gold);">Copiar CSS</strong> para extrair o bloco pronto pra colar.</p>
+  </div>
+  <div class="panel__body" id="panel-body"></div>
+  <div class="actions">
+    <button id="btn-open" class="primary">Abrir Drawer</button>
+    <button id="btn-close">Fechar Drawer</button>
+    <button id="btn-copy">Copiar CSS</button>
+    <button id="btn-reset">Resetar</button>
+  </div>
+</aside>
+
+<section class="preview">
+  <div class="preview__head">
+    <span><strong>Live Preview</strong></span>
+    <span class="preview__meta">390 × 844 (iPhone 14 Pro)</span>
+  </div>
+  <div class="preview__frame">
+    <div class="preview__notch"></div>
+    <iframe id="site" src="index.html" title="Preview do site HAAS"></iframe>
+  </div>
+</section>
+
+<div class="modal" id="modal">
+  <div class="modal__box">
+    <h2 class="modal__title">CSS Pronto pra Colar</h2>
+    <p style="margin: 0; font-size: 12px; color: var(--tweak-muted); line-height: 1.5;">
+      Cole este bloco no topo de <code style="color: var(--tweak-gold);">assets/css/styles.css</code>, substituindo o bloco <code>:root</code> "Nav-drawer mobile — Tweak Tokens" existente.
+    </p>
+    <pre class="modal__pre" id="modal-pre"></pre>
+    <div class="modal__actions">
+      <button id="modal-copy" class="primary">Copiar para Clipboard</button>
+      <button id="modal-close">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+(() => {
+  'use strict';
+
+  const DEFAULTS = {
+    '--drawer-bg': 'rgba(20, 25, 20, 0.7)',
+    '--drawer-blur': '16px',
+    '--drawer-saturate': '140%',
+    '--drawer-moldura-opacity': '0.92',
+    '--drawer-link-color': '#FFFFFF',
+    '--drawer-link-color-hover': '#C9A961',
+    '--drawer-close-bg': 'rgba(10, 6, 4, 0.55)',
+    '--drawer-close-bg-hover': 'rgba(20, 14, 6, 0.7)',
+    '--drawer-close-border': 'rgba(201, 169, 97, 0.45)',
+    '--drawer-close-border-hover': '#C9A961',
+    '--drawer-close-color': '#C9A961',
+    '--drawer-close-color-hover': '#E5C77A',
+    '--drawer-cta-bg': '#C9A961',
+    '--drawer-cta-bg-hover': '#A78A4B',
+    '--drawer-cta-color': '#000000',
+    '--drawer-cta-border': '#E5C77A',
+    '--drawer-link-size': '24px',
+    '--drawer-link-weight': '700',
+    '--drawer-link-tracking': '0.1em',
+    '--drawer-link-case': 'uppercase',
+    '--drawer-close-size': '32px',
+    '--drawer-cta-size': '11px',
+    '--drawer-cta-weight': '600',
+    '--drawer-cta-tracking': '0.22em',
+    '--drawer-gap': '32px',
+    '--drawer-close-offset-top': '20px',
+    '--drawer-close-offset-right': '20px',
+    '--drawer-close-box': '52px',
+    '--drawer-cta-padding': '12px 24px 12px 18px',
+    '--drawer-cta-margin-top': '24px',
+    '--drawer-cta-max-width': 'min(260px, calc(100% - 120px))'
+  };
+
+  const SCHEMA = [
+    { group: 'Cores — Painel', fields: [
+      { key: '--drawer-bg', label: 'Fundo do painel', type: 'rgba' },
+      { key: '--drawer-blur', label: 'Blur de fundo', type: 'range', min: 0, max: 40, step: 1, unit: 'px' },
+      { key: '--drawer-saturate', label: 'Saturação atrás', type: 'range', min: 50, max: 200, step: 5, unit: '%' },
+      { key: '--drawer-moldura-opacity', label: 'Moldura gold (opacity)', type: 'range', min: 0, max: 1, step: 0.02, unit: '' }
+    ]},
+    { group: 'Cores — Links', fields: [
+      { key: '--drawer-link-color', label: 'Cor dos links', type: 'hex' },
+      { key: '--drawer-link-color-hover', label: 'Cor no hover', type: 'hex' }
+    ]},
+    { group: 'Cores — Botão fechar (×)', fields: [
+      { key: '--drawer-close-bg', label: 'Fundo do botão', type: 'rgba' },
+      { key: '--drawer-close-bg-hover', label: 'Fundo no hover', type: 'rgba' },
+      { key: '--drawer-close-border', label: 'Borda', type: 'rgba' },
+      { key: '--drawer-close-border-hover', label: 'Borda no hover', type: 'hex' },
+      { key: '--drawer-close-color', label: 'Cor do glyph ×', type: 'hex' },
+      { key: '--drawer-close-color-hover', label: 'Cor × no hover', type: 'hex' }
+    ]},
+    { group: 'Cores — CTA WhatsApp', fields: [
+      { key: '--drawer-cta-bg', label: 'Fundo do pill', type: 'hex' },
+      { key: '--drawer-cta-bg-hover', label: 'Fundo no hover', type: 'hex' },
+      { key: '--drawer-cta-color', label: 'Cor do texto', type: 'hex' },
+      { key: '--drawer-cta-border', label: 'Cor da borda', type: 'hex' }
+    ]},
+    { group: 'Tipografia — Links', fields: [
+      { key: '--drawer-link-size', label: 'Tamanho', type: 'range', min: 12, max: 48, step: 1, unit: 'px' },
+      { key: '--drawer-link-weight', label: 'Peso da fonte', type: 'range', min: 300, max: 900, step: 100, unit: '' },
+      { key: '--drawer-link-tracking', label: 'Letter-spacing', type: 'range', min: 0, max: 0.3, step: 0.01, unit: 'em' },
+      { key: '--drawer-link-case', label: 'Caixa', type: 'select', options: ['uppercase', 'none', 'lowercase', 'capitalize'] }
+    ]},
+    { group: 'Tipografia — Botão ×', fields: [
+      { key: '--drawer-close-size', label: 'Tamanho do glyph ×', type: 'range', min: 16, max: 48, step: 1, unit: 'px' }
+    ]},
+    { group: 'Tipografia — CTA WhatsApp', fields: [
+      { key: '--drawer-cta-size', label: 'Tamanho do texto', type: 'range', min: 8, max: 24, step: 1, unit: 'px' },
+      { key: '--drawer-cta-weight', label: 'Peso da fonte', type: 'range', min: 300, max: 900, step: 100, unit: '' },
+      { key: '--drawer-cta-tracking', label: 'Letter-spacing', type: 'range', min: 0, max: 0.3, step: 0.01, unit: 'em' }
+    ]},
+    { group: 'Layout', fields: [
+      { key: '--drawer-gap', label: 'Espaço entre itens', type: 'range', min: 0, max: 80, step: 2, unit: 'px' },
+      { key: '--drawer-close-offset-top', label: '× — offset top', type: 'range', min: 0, max: 60, step: 1, unit: 'px' },
+      { key: '--drawer-close-offset-right', label: '× — offset right', type: 'range', min: 0, max: 60, step: 1, unit: 'px' },
+      { key: '--drawer-close-box', label: '× — hit area (lado)', type: 'range', min: 32, max: 80, step: 1, unit: 'px' },
+      { key: '--drawer-cta-margin-top', label: 'Margem antes do CTA', type: 'range', min: 0, max: 80, step: 1, unit: 'px' },
+      { key: '--drawer-cta-padding', label: 'Padding CTA (shorthand)', type: 'text' },
+      { key: '--drawer-cta-max-width', label: 'Largura máx CTA (CSS expr)', type: 'text' }
+    ]}
+  ];
+
+  const state = { ...DEFAULTS };
+  const iframe = document.getElementById('site');
+  const panelBody = document.getElementById('panel-body');
+
+  // ---------- Color helpers ----------
+  function hexToRgb(hex) {
+    hex = hex.replace('#', '').trim();
+    if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+    return {
+      r: parseInt(hex.slice(0, 2), 16),
+      g: parseInt(hex.slice(2, 4), 16),
+      b: parseInt(hex.slice(4, 6), 16)
+    };
+  }
+  function rgbToHex({ r, g, b }) {
+    const h = (n) => Math.max(0, Math.min(255, n | 0)).toString(16).padStart(2, '0');
+    return ('#' + h(r) + h(g) + h(b)).toUpperCase();
+  }
+  function parseColor(str) {
+    str = String(str).trim();
+    if (str.startsWith('#')) {
+      const { r, g, b } = hexToRgb(str);
+      return { r, g, b, a: 1 };
+    }
+    const m = str.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+))?\s*\)/);
+    if (m) return { r: +m[1], g: +m[2], b: +m[3], a: m[4] !== undefined ? +m[4] : 1 };
+    return { r: 255, g: 255, b: 255, a: 1 };
+  }
+  function formatRgba({ r, g, b, a }) {
+    return `rgba(${r}, ${g}, ${b}, ${a})`;
+  }
+
+  // ---------- Apply ----------
+  function applyVar(key, value) {
+    state[key] = value;
+    const target = iframe.contentDocument && iframe.contentDocument.documentElement;
+    if (target) target.style.setProperty(key, value);
+  }
+  function applyAll() {
+    Object.keys(state).forEach((k) => applyVar(k, state[k]));
+  }
+
+  // ---------- UI ----------
+  function makeField(field) {
+    const wrap = document.createElement('div');
+    wrap.className = 'field';
+
+    const row = document.createElement('div');
+    row.className = 'field__row';
+    const label = document.createElement('span');
+    label.className = 'field__label';
+    label.textContent = field.label;
+    const value = document.createElement('span');
+    value.className = 'field__value';
+    value.textContent = state[field.key];
+    row.appendChild(label);
+    row.appendChild(value);
+    wrap.appendChild(row);
+
+    const controls = document.createElement('div');
+    controls.className = 'field__controls';
+    wrap.appendChild(controls);
+
+    const set = (v) => { value.textContent = v; applyVar(field.key, v); };
+
+    if (field.type === 'range') {
+      const r = document.createElement('input');
+      r.type = 'range';
+      r.min = field.min; r.max = field.max; r.step = field.step;
+      r.value = parseFloat(state[field.key]);
+      r.addEventListener('input', () => {
+        const v = parseFloat(r.value);
+        const dec = (field.step < 1) ? 2 : 0;
+        set((dec ? v.toFixed(dec) : v) + (field.unit || ''));
+      });
+      controls.appendChild(r);
+
+    } else if (field.type === 'hex') {
+      const c = document.createElement('input');
+      c.type = 'color';
+      c.value = state[field.key];
+      c.addEventListener('input', () => set(c.value.toUpperCase()));
+      controls.appendChild(c);
+      const txt = document.createElement('input');
+      txt.type = 'text'; txt.value = state[field.key];
+      txt.addEventListener('change', () => {
+        const v = txt.value.trim().toUpperCase();
+        c.value = v; set(v);
+      });
+      controls.appendChild(txt);
+
+    } else if (field.type === 'rgba') {
+      const parsed = parseColor(state[field.key]);
+      const c = document.createElement('input');
+      c.type = 'color';
+      c.value = rgbToHex(parsed);
+      const alphaRow = document.createElement('div');
+      alphaRow.className = 'alpha-row';
+      const al = document.createElement('span');
+      al.className = 'alpha-row__label';
+      al.textContent = 'alpha';
+      const a = document.createElement('input');
+      a.type = 'range'; a.min = 0; a.max = 1; a.step = 0.01;
+      a.value = parsed.a;
+      alphaRow.appendChild(al);
+      alphaRow.appendChild(a);
+
+      const update = () => {
+        const { r, g, b } = hexToRgb(c.value);
+        set(formatRgba({ r, g, b, a: parseFloat(a.value) }));
+      };
+      c.addEventListener('input', update);
+      a.addEventListener('input', update);
+      controls.appendChild(c);
+      controls.appendChild(alphaRow);
+
+    } else if (field.type === 'select') {
+      const s = document.createElement('select');
+      field.options.forEach((opt) => {
+        const o = document.createElement('option');
+        o.value = opt; o.textContent = opt;
+        if (opt === state[field.key]) o.selected = true;
+        s.appendChild(o);
+      });
+      s.addEventListener('change', () => set(s.value));
+      controls.appendChild(s);
+
+    } else if (field.type === 'text') {
+      const t = document.createElement('input');
+      t.type = 'text'; t.value = state[field.key];
+      t.addEventListener('change', () => set(t.value.trim()));
+      controls.appendChild(t);
+    }
+
+    return wrap;
+  }
+
+  function renderUI() {
+    panelBody.innerHTML = '';
+    SCHEMA.forEach((g) => {
+      const section = document.createElement('div');
+      section.className = 'group';
+      const h = document.createElement('h3');
+      h.className = 'group__title';
+      h.textContent = g.group;
+      section.appendChild(h);
+      g.fields.forEach((field) => section.appendChild(makeField(field)));
+      panelBody.appendChild(section);
+    });
+  }
+
+  // ---------- Drawer control ----------
+  function openDrawer() {
+    const doc = iframe.contentDocument;
+    if (!doc) return;
+    const drawer = doc.querySelector('.nav-drawer');
+    const toggle = doc.querySelector('.nav-toggle');
+    if (drawer && !drawer.classList.contains('is-open') && toggle) toggle.click();
+  }
+  function closeDrawer() {
+    const doc = iframe.contentDocument;
+    if (!doc) return;
+    const drawer = doc.querySelector('.nav-drawer');
+    const closeBtn = doc.querySelector('.nav-drawer__close');
+    if (drawer && drawer.classList.contains('is-open') && closeBtn) closeBtn.click();
+  }
+
+  // ---------- Export CSS ----------
+  function buildCSS() {
+    const lines = Object.keys(DEFAULTS).map((k) => `  ${k}: ${state[k]};`).join('\n');
+    return `:root {\n${lines}\n}`;
+  }
+  function openModal() {
+    document.getElementById('modal-pre').textContent = buildCSS();
+    document.getElementById('modal').classList.add('is-open');
+  }
+  function closeModal() {
+    document.getElementById('modal').classList.remove('is-open');
+  }
+
+  // ---------- Button wiring ----------
+  document.getElementById('btn-open').addEventListener('click', openDrawer);
+  document.getElementById('btn-close').addEventListener('click', closeDrawer);
+  document.getElementById('btn-copy').addEventListener('click', openModal);
+  document.getElementById('btn-reset').addEventListener('click', () => {
+    Object.assign(state, DEFAULTS);
+    renderUI();
+    applyAll();
+  });
+
+  document.getElementById('modal-close').addEventListener('click', closeModal);
+  document.getElementById('modal-copy').addEventListener('click', () => {
+    const css = buildCSS();
+    navigator.clipboard.writeText(css).then(() => {
+      const btn = document.getElementById('modal-copy');
+      const orig = btn.textContent;
+      btn.textContent = 'Copiado!';
+      btn.classList.add('is-success');
+      setTimeout(() => { btn.textContent = orig; btn.classList.remove('is-success'); }, 1500);
+    }).catch(() => {
+      // Fallback: select text in pre
+      const pre = document.getElementById('modal-pre');
+      const range = document.createRange();
+      range.selectNodeContents(pre);
+      const sel = window.getSelection();
+      sel.removeAllRanges();
+      sel.addRange(range);
+    });
+  });
+  document.getElementById('modal').addEventListener('click', (e) => {
+    if (e.target.id === 'modal') closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeModal();
+  });
+
+  // Força recarregamento do styles.css sem cache do browser — assim qualquer
+  // edição que você fizer em assets/css/styles.css aparece imediatamente após
+  // recarregar a página, sem precisar Ctrl+Shift+R.
+  function bustCssCache() {
+    try {
+      const idoc = iframe.contentDocument;
+      if (!idoc) return;
+      const link = idoc.querySelector('link[href*="styles.css"]');
+      if (!link) return;
+      const base = link.href.split('?')[0];
+      link.href = base + '?_=' + Date.now();
+    } catch (e) {}
+  }
+
+  // ---------- Init ----------
+  renderUI();
+  iframe.addEventListener('load', () => {
+    try {
+      iframe.contentWindow.sessionStorage.setItem('haas_intro_seen', '1');
+    } catch (e) {}
+    bustCssCache();
+    // Aguarda o CSS fresco assentar antes de aplicar tokens + abrir drawer
+    setTimeout(() => { applyAll(); openDrawer(); }, 400);
+  });
+})();
+</script>
+
+</body>
+</html>

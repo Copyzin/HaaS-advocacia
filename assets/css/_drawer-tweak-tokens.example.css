@@ -1,0 +1,73 @@
+/* =========================================================================
+   Nav-drawer mobile — Tweak Tokens (ARQUIVADO)
+
+   Este arquivo está ARQUIVADO. Não é importado por nenhum HTML, nenhum
+   <link rel="stylesheet"> aponta pra ele. Fica aqui como referência para
+   uma eventual rodada futura de ajustes finos no nav-drawer mobile.
+
+   Os valores abaixo refletem a configuração final aplicada em
+   assets/css/styles.css nas regras .nav-drawer* (inline literals).
+
+   ---------------------------------------------------------------------------
+   COMO REATIVAR O TWEAK STUDIO
+
+   1) Copiar o bloco :root abaixo de volta para o topo de assets/css/styles.css
+      (logo após o :root "Section background system").
+   2) Nas regras .nav-drawer*, substituir os valores literais por var(--drawer-X)
+      correspondentes (lista de mapeamento no commit que removeu o tweak).
+   3) Mover _archive/tweak.html de volta para a raiz do projeto.
+   4) Rodar `python -m http.server 5173` e abrir http://localhost:5173/tweak.html.
+
+   Ver _archive/README.md para o passo-a-passo completo.
+   ========================================================================= */
+:root {
+  /* ---------- Cores / contraste ---------- */
+  /* Painel */
+  --drawer-bg: rgba(0, 0, 0, 0.78);
+  --drawer-blur: 7px;
+  --drawer-saturate: 165%;
+  --drawer-moldura-opacity: 0.94;
+
+  /* Links de navegação */
+  --drawer-link-color: #F2F2F2;
+  --drawer-link-color-hover: #C9A961;
+
+  /* Botão de fechar (×) */
+  --drawer-close-bg: rgba(10, 6, 4, 0.55);
+  --drawer-close-bg-hover: rgba(20, 14, 6, 0.7);
+  --drawer-close-border: rgba(201, 169, 97, 0.45);
+  --drawer-close-border-hover: #C9A961;
+  --drawer-close-color: #C9A961;
+  --drawer-close-color-hover: #E5C77A;
+
+  /* CTA WhatsApp dentro do drawer */
+  --drawer-cta-bg: #C9A961;
+  --drawer-cta-bg-hover: #A78A4B;
+  --drawer-cta-color: #000000;
+  --drawer-cta-border: #E5C77A;
+
+  /* ---------- Tipografia ---------- */
+  /* Links */
+  --drawer-link-font: 'Cinzel', serif;
+  --drawer-link-size: 24px;
+  --drawer-link-weight: 700;
+  --drawer-link-tracking: 0.1em;
+  --drawer-link-case: uppercase;
+
+  /* Close button (×) */
+  --drawer-close-size: 32px;
+
+  /* CTA WhatsApp */
+  --drawer-cta-size: 14px;
+  --drawer-cta-weight: 800;
+  --drawer-cta-tracking: 0.02em;
+
+  /* ---------- Layout / espaçamento ---------- */
+  --drawer-gap: 32px;
+  --drawer-close-offset-top: 20px;
+  --drawer-close-offset-right: 20px;
+  --drawer-close-box: 52px;
+  --drawer-cta-padding: 12px 24px 12px 18px;
+  --drawer-cta-margin-top: 24px;
+  --drawer-cta-max-width: min(260px, calc(100% - 120px));
+}
