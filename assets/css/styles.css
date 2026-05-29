@@ -22,6 +22,77 @@
   --bg-section-default: #120C0D;
 }
 
+/* =========================================================================
+   Nav-drawer mobile — Tweak Tokens (TEMPORÁRIO / removível)
+
+   Andaime de configuração para a fase de ajuste do menu hambúrguer mobile.
+   Mude UM valor abaixo, salve, recarregue → tap no hambúrguer → veja o efeito.
+   Organizado em: Cores · Tipografia · Layout.
+
+   Exemplos rápidos:
+     • Fundo mais opaco   → --drawer-bg: rgba(10, 10, 10, 0.92);
+     • Links menores      → --drawer-link-size: 20px;
+     • Mais respiro       → --drawer-gap: 48px;
+     • CTA WhatsApp wider → --drawer-cta-max-width: min(320px, calc(100% - 80px));
+
+   Status: temporário. Quando os valores finais forem decididos, este bloco é
+   removido e cada `var(--drawer-x)` nas regras `.nav-drawer*` (linhas ~530
+   em diante) é substituído pelo valor literal correspondente. Backup vai
+   pra assets/css/_drawer-tweak-tokens.example.css. Sem regressão visual,
+   sem dependência runtime.
+   ========================================================================= */
+:root {
+  /* ---------- Cores / contraste ---------- */
+  /* Painel */
+  --drawer-bg: rgba(20, 25, 20, 0.7);
+  --drawer-blur: 16px;
+  --drawer-saturate: 140%;
+  --drawer-moldura-opacity: 0.92;
+
+  /* Links de navegação */
+  --drawer-link-color: #FFFFFF;
+  --drawer-link-color-hover: #C9A961;
+
+  /* Botão de fechar (×) */
+  --drawer-close-bg: rgba(10, 6, 4, 0.55);
+  --drawer-close-bg-hover: rgba(20, 14, 6, 0.7);
+  --drawer-close-border: rgba(201, 169, 97, 0.45);
+  --drawer-close-border-hover: #C9A961;
+  --drawer-close-color: #C9A961;
+  --drawer-close-color-hover: #E5C77A;
+
+  /* CTA WhatsApp dentro do drawer */
+  --drawer-cta-bg: #C9A961;
+  --drawer-cta-bg-hover: #A78A4B;
+  --drawer-cta-color: #000000;
+  --drawer-cta-border: #E5C77A;
+
+  /* ---------- Tipografia ---------- */
+  /* Links */
+  --drawer-link-font: 'Cinzel', serif;
+  --drawer-link-size: 24px;
+  --drawer-link-weight: 700;
+  --drawer-link-tracking: 0.1em;
+  --drawer-link-case: uppercase;
+
+  /* Close button (×) */
+  --drawer-close-size: 32px;
+
+  /* CTA WhatsApp */
+  --drawer-cta-size: 11px;
+  --drawer-cta-weight: 600;
+  --drawer-cta-tracking: 0.22em;
+
+  /* ---------- Layout / espaçamento ---------- */
+  --drawer-gap: 32px;
+  --drawer-close-offset-top: 20px;
+  --drawer-close-offset-right: 20px;
+  --drawer-close-box: 52px;
+  --drawer-cta-padding: 12px 24px 12px 18px;
+  --drawer-cta-margin-top: 24px;
+  --drawer-cta-max-width: min(260px, calc(100% - 120px));
+}
+
 /* Atalhos pro sistema tonal de seção */
 .bg-section-emphasis {
   background-color: var(--bg-section-emphasis);
@@ -514,9 +585,9 @@ body.is-intro-locked {
      esverdeado (rgb 20,25,20) — derivado de #212821 mas mais escuro pra a
      estética dark do site prevalecer; foco visual fica no texto Cinzel, não
      no painel de fundo. */
-  background-color: rgba(20, 25, 20, 0.7);
-  -webkit-backdrop-filter: blur(16px) saturate(140%);
-          backdrop-filter: blur(16px) saturate(140%);
+  background-color: var(--drawer-bg);
+  -webkit-backdrop-filter: blur(var(--drawer-blur)) saturate(var(--drawer-saturate));
+          backdrop-filter: blur(var(--drawer-blur)) saturate(var(--drawer-saturate));
   /* Stack de imagens de fundo, base → top:
        1) Radial gradient de iluminação sutil — luz gold que nasce no topo-centro
           do drawer (onde fica o close button) e dissolve antes da metade vertical.
@@ -536,7 +607,7 @@ body.is-intro-locked {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 32px;
+  gap: var(--drawer-gap);
   transform: translateX(100%);
   transition: transform 400ms cubic-bezier(0.33, 1, 0.68, 1);
 }
@@ -573,7 +644,7 @@ body.is-intro-locked {
        2) Como o ::before é child do .nav-drawer, ele acompanha o transform do
           swipe-to-open em tempo real. O frame entra junto com o resto do drawer
           seguindo o dedo, sem aparecer "depois" via opacity transition. */
-  opacity: 0.92;
+  opacity: var(--drawer-moldura-opacity);
 }
 
 /* Garantir que close, links e CTA WhatsApp fiquem acima da moldura. */
@@ -583,16 +654,16 @@ body.is-intro-locked {
 }
 
 .nav-drawer a {
-  font-family: 'Cinzel', serif;
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  color: #FFFFFF;
+  font-family: var(--drawer-link-font);
+  font-size: var(--drawer-link-size);
+  font-weight: var(--drawer-link-weight);
+  letter-spacing: var(--drawer-link-tracking);
+  text-transform: var(--drawer-link-case);
+  color: var(--drawer-link-color);
 }
 
 .nav-drawer a:hover {
-  color: #C9A961;
+  color: var(--drawer-link-color-hover);
 }
 
 /* Entrada escalonada dos itens do drawer.
@@ -626,23 +697,23 @@ body.is-intro-locked {
    Hit-area generoso (48×48), × prominente, rotate-on-hover de 90° pra micro-feedback. */
 .nav-drawer__close {
   position: absolute;
-  top: 20px;
-  right: 20px;
-  width: 52px;
-  height: 52px;
+  top: var(--drawer-close-offset-top);
+  right: var(--drawer-close-offset-right);
+  width: var(--drawer-close-box);
+  height: var(--drawer-close-box);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(10, 6, 4, 0.55);
+  background: var(--drawer-close-bg);
   -webkit-backdrop-filter: blur(8px) saturate(140%);
           backdrop-filter: blur(8px) saturate(140%);
-  border: 1px solid rgba(201, 169, 97, 0.45);
+  border: 1px solid var(--drawer-close-border);
   border-radius: 999px;
-  color: #C9A961;
+  color: var(--drawer-close-color);
   /* × glyph: Cinzel light, line-height 1 pra centrar perfeitamente. Tamanho
      grande pra o close virar marca visual, não detalhe escondido. */
   font-family: 'Cinzel', serif;
-  font-size: 32px;
+  font-size: var(--drawer-close-size);
   font-weight: 400;
   line-height: 1;
   padding: 0;
@@ -655,9 +726,9 @@ body.is-intro-locked {
 
 .nav-drawer__close:hover,
 .nav-drawer__close:focus-visible {
-  border-color: #C9A961;
-  background: rgba(20, 14, 6, 0.7);
-  color: #E5C77A;
+  border-color: var(--drawer-close-border-hover);
+  background: var(--drawer-close-bg-hover);
+  color: var(--drawer-close-color-hover);
   outline: none;
   /* Rotaciona 90° pra reforçar a intenção de "fechar". O × continua simétrico
      visualmente, mas o giro responde imediatamente ao toque. */
@@ -684,24 +755,24 @@ body.is-intro-locked {
   justify-content: center;
   gap: 12px;
   font-family: 'Cinzel', serif;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.22em;
+  font-size: var(--drawer-cta-size);
+  font-weight: var(--drawer-cta-weight);
+  letter-spacing: var(--drawer-cta-tracking);
   text-transform: uppercase;
   /* !important neutraliza a regra .nav-drawer a (Cinzel 24px branco) e o
      hover-gold .nav-drawer a:hover — senão o texto ficaria branco/gold em vez
      de preto sobre o fundo gold. */
-  color: #000000 !important;
-  background: #C9A961;
-  padding: 12px 24px 12px 18px;
+  color: var(--drawer-cta-color) !important;
+  background: var(--drawer-cta-bg);
+  padding: var(--drawer-cta-padding);
   border-radius: 999px;
-  margin-top: 24px;
+  margin-top: var(--drawer-cta-margin-top);
   /* Outline composto:
        1) Border 1px gold-light (rim de luz na transição com o frame da moldura).
        2) Inset shadow no topo (highlight) e fundo (ground line) — dá curvatura.
        3) Outer halo gold-deep discreto — separa o pill do warm-dark do drawer.
        4) Aura outer expandida com alpha baixíssimo — premium glow sem virar neon. */
-  border: 1px solid #E5C77A;
+  border: 1px solid var(--drawer-cta-border);
   box-shadow:
     inset 0 1px 0 rgba(255, 255, 255, 0.28),
     inset 0 -1px 0 rgba(0, 0, 0, 0.18),
@@ -709,7 +780,7 @@ body.is-intro-locked {
     0 6px 18px rgba(0, 0, 0, 0.4),
     0 0 28px rgba(201, 169, 97, 0.18);
   /* Largura máxima — pill nunca encosta nos fios gold laterais da moldura. */
-  max-width: min(260px, calc(100% - 120px));
+  max-width: var(--drawer-cta-max-width);
   box-sizing: border-box;
   /* Inclui opacity/transform pra entrar coreografado pelo stagger do drawer
      sem competir. Hover usa background/border-color + box-shadow (sem transform),
@@ -723,8 +794,8 @@ body.is-intro-locked {
 
 .nav-drawer__cta-whatsapp:hover,
 .nav-drawer__cta-whatsapp:focus-visible {
-  color: #000000 !important;
-  background: #A78A4B;
+  color: var(--drawer-cta-color) !important;
+  background: var(--drawer-cta-bg-hover);
   border-color: #C9A961;
   outline: none;
   box-shadow:
