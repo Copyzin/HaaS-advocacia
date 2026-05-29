@@ -749,7 +749,11 @@ body.is-intro-locked {
    "lê" como "botão WhatsApp" antes de você terminar de ler o label.
    Outline composto: rim gold-light fino + ring interno escuro + halo gold sutil
    = profundidade premium sem virar FAB-mode agressivo. */
-.nav-drawer__cta-whatsapp {
+/* Specificity bump: .nav-drawer .nav-drawer__cta-whatsapp (0,2,0) supera
+   .nav-drawer a (0,1,1) — sem isso, font-size/weight/tracking do CTA eram
+   sobrescritos pelos valores dos links do drawer. Fix dum bug pré-existente
+   que ficou exposto ao usar o tweak studio em tweak.html. */
+.nav-drawer .nav-drawer__cta-whatsapp {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -792,8 +796,8 @@ body.is-intro-locked {
               box-shadow 200ms ease;
 }
 
-.nav-drawer__cta-whatsapp:hover,
-.nav-drawer__cta-whatsapp:focus-visible {
+.nav-drawer .nav-drawer__cta-whatsapp:hover,
+.nav-drawer .nav-drawer__cta-whatsapp:focus-visible {
   color: var(--drawer-cta-color) !important;
   background: var(--drawer-cta-bg-hover);
   border-color: #C9A961;
