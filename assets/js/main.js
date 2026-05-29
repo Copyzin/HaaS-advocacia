@@ -17,6 +17,11 @@
 
   const STORAGE_KEY = 'haas_intro_seen';
   const AUDIO_KEY = 'haas_intro_audio';
+  // Volume default do áudio da intro quando o usuário ativa o som. Valor
+  // moderado (50%) — som cinematográfico bem audível sem assustar usuário
+  // que esquece o headphone no máximo. Usuário não tem slider de volume,
+  // só toggle; se quiser ajustar, usa o controle nativo do SO.
+  const INTRO_AUDIO_VOLUME = 0.5;
   // REDUCED_MOTION é avaliado live: usuário pode trocar a preferência do SO
   // no meio da sessão (ex.: Settings → Accessibility no Android/iOS) e o site
   // precisa reagir sem reload. Mantido como `let` para permitir update do listener.
@@ -84,6 +89,11 @@
     const heroContent = $('.hero__content');
     const heroBg = $('.hero__bg');
     const body = document.body;
+
+    // Volume default antes de qualquer play(). Define enquanto o vídeo ainda
+    // está muted, então não há som audível agora mesmo — só prepara o nível
+    // pra quando o usuário clicar no botão e desmutar.
+    if (video) { try { video.volume = INTRO_AUDIO_VOLUME; } catch (err) {} }
 
     // Estado do áudio (mute/unmute toggle). Default: muted (autoplay funciona).
     // Persistido em sessionStorage pra sobreviver a F5 dentro da sessão.
