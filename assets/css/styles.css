@@ -2169,6 +2169,42 @@ body.is-intro-locked {
   z-index: 2;
 }
 
+/* ---------------------------------------------------------------------------
+   Capa em MODO FOTO (.article-cover--photo): exibe uma foto real preenchendo a
+   moldura, SEM o filtro dourado de icone. A capa decorativa (icone) continua
+   sendo o padrao; este modo so e usado quando o artigo tem foto de capa
+   enviada. Markup gerado pelo publicador (static_html._cover_html).
+   --------------------------------------------------------------------------- */
+.article-cover__photo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* scrim: escurece topo/base para os labels (categoria/HAAS) ficarem legiveis
+   sobre qualquer foto */
+.article-cover__scrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(5, 5, 5, 0.58) 0%,
+    rgba(5, 5, 5, 0.06) 26%,
+    rgba(5, 5, 5, 0.06) 60%,
+    rgba(5, 5, 5, 0.78) 100%
+  );
+  pointer-events: none;
+}
+
+/* molduras de canto acima da foto */
+.article-cover--photo::before,
+.article-cover--photo::after {
+  z-index: 3;
+}
+
 /* Article body wrapper — full-bleed escuro, conteúdo em ledger */
 .article-body {
   padding: 96px 0 64px;
@@ -2451,6 +2487,21 @@ body.is-intro-locked {
   line-height: 1.5;
   color: #8A8A8A;
   text-align: center;
+}
+
+/* Figura inline em MODO FOTO (.article-figure__photo): foto real sem o filtro
+   dourado de icone; __frame--photo reduz o padding para a foto preencher a
+   moldura. So usada quando ha imagem de figura enviada. */
+.article-figure__frame--photo {
+  padding: 14px;
+}
+
+.article-figure__photo {
+  width: 100%;
+  height: auto;
+  max-height: 520px;
+  object-fit: cover;
+  display: block;
 }
 
 /* FAQ accordion no corpo do artigo */
