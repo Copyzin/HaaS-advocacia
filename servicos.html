@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Serviços — HAAS Advocacia e Consultoria Jurídica</title>
-  <meta name="description" content="Áreas de atuação da HAAS Advocacia: Previdenciário com Dra. Aline, Trabalhista com Dra. Heloísa, e Civil e Família em atendimento conjunto.">
+  <meta name="description" content="Áreas de atuação da HAAS Advocacia: Trabalhista com Dra. Heloísa, Previdenciário com Dra. Aline, e Família e Direito do Consumidor em atendimento conjunto.">
 
   <link rel="icon" type="image/png" href="assets/images/favicon.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -24,8 +24,76 @@
     .site-header { transform: translateY(0) !important; opacity: 1 !important; }
     .page-hero { padding: 90px 0 80px; background-color: #000; text-align: center; }
     .page-hero__eyebrow { font-family: 'Cinzel',serif; font-size: 12px; letter-spacing: .25em; text-transform: uppercase; color: #C9A961; margin: 0 0 24px; }
-    .page-hero__title { font-family: 'Cinzel',serif; font-weight: 700; font-size: clamp(40px,7vw,80px); letter-spacing: .04em; text-transform: uppercase; line-height: 1.32; margin: 0 0 32px; }
+    .page-hero__title { font-family: 'Cinzel',serif; font-weight: 700; font-size: clamp(20px,5.5vw,80px); letter-spacing: .04em; text-transform: uppercase; line-height: 1.32; margin: 0 0 32px; }
     .page-hero__subtitle { font-family: 'Cormorant Garamond',serif; font-style: italic; font-size: clamp(18px,2vw,24px); color: #FFF; margin: 0 auto; max-width: 56ch; }
+
+    /* ===================================================================
+       Bento de Áreas + CTA — ESCOPO EXCLUSIVO desta página (servicos.html).
+       Não reutiliza .service-card/.services-grid/.cta-final (compartilhados),
+       para não alterar a home nem as sub-rotas (/servicos/*).
+       =================================================================== */
+    .svc-section { padding: 8px 0 clamp(64px,9vw,110px); background-color: #0A0A0A; }
+    .svc-bento { max-width: 1180px; margin: 0 auto; padding: 0 24px; display: grid; grid-template-columns: 1fr; gap: 18px; }
+    @media (min-width: 768px) { .svc-bento { grid-template-columns: repeat(2,1fr); gap: 20px; } }
+    @media (min-width: 1024px) {
+      .svc-bento { grid-template-columns: repeat(6,1fr); gap: 22px; }
+      .svc-tile--wide { grid-column: span 4; }
+      .svc-tile--narrow { grid-column: span 2; }
+    }
+
+    .svc-tile {
+      position: relative; isolation: isolate; overflow: hidden;
+      display: flex; flex-direction: column; min-height: 232px;
+      padding: clamp(24px,2.4vw,36px);
+      background: #141414; border: 1px solid rgba(201,169,97,0.16);
+      border-radius: 24px; color: #F5F1E8; text-decoration: none;
+      opacity: 0; transform: translateY(26px); filter: blur(6px);
+      transition: opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1),
+                  filter .7s cubic-bezier(.16,1,.3,1), border-color .4s ease, box-shadow .4s ease;
+      transition-delay: calc(var(--i,0) * 90ms);
+      will-change: transform, opacity;
+    }
+    .svc-tile.is-in { opacity: 1; transform: translateY(0); filter: blur(0); }
+    .svc-tile::before {
+      content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit;
+      /* Glow FIXO — posição definida por --mx/--my em cada card (varia por card),
+         revelado apenas no hover. Não segue o cursor (tom institucional, sóbrio). */
+      background: radial-gradient(360px circle at var(--mx,50%) var(--my,8%), rgba(201,169,97,0.15), transparent 65%);
+      opacity: 0; transition: opacity .45s ease;
+    }
+    .svc-tile:hover, .svc-tile:focus-visible { transform: translateY(-4px); border-color: rgba(201,169,97,0.5); box-shadow: 0 26px 54px -30px rgba(201,169,97,0.4); outline: none; }
+    .svc-tile:hover::before, .svc-tile:focus-visible::before { opacity: 1; }
+
+    .svc-tile__icon { width: 46px; height: 46px; margin: 0 0 20px; }
+    .svc-tile__name { font-family: 'Cinzel',serif; font-weight: 700; font-size: clamp(20px,1.7vw,26px); letter-spacing: .06em; text-transform: uppercase; margin: 0 0 6px; }
+    .svc-tile__lawyer { font-family: 'Cormorant Garamond',serif; font-style: italic; font-size: 16px; color: #C9A961; margin: 0 0 16px; }
+    .svc-tile__desc { font-family: 'Cormorant Garamond',serif; font-size: 17px; line-height: 1.55; color: rgba(245,241,232,0.8); margin: 0 0 18px; max-width: 54ch; }
+    .svc-tile__chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 24px; padding: 0; list-style: none; }
+    .svc-tile__chips li { font-family: 'Inter',sans-serif; font-size: 12px; color: rgba(245,241,232,0.74); border: 1px solid rgba(201,169,97,0.22); border-radius: 999px; padding: 6px 12px; }
+    .svc-tile__link { margin-top: auto; display: inline-flex; align-items: center; gap: 10px; font-family: 'Cinzel',serif; font-size: 12px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: #C9A961; }
+    .svc-tile__link .ico { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 999px; border: 1px solid rgba(201,169,97,0.4); transition: transform .35s cubic-bezier(.34,1.56,.64,1), background .3s ease, border-color .3s ease; }
+    .svc-tile:hover .svc-tile__link .ico, .svc-tile:focus-visible .svc-tile__link .ico { transform: translateX(3px); background: rgba(201,169,97,0.14); border-color: #C9A961; }
+
+    /* CTA contido — cabe na moldura da tela (substitui o título gigante) */
+    .svc-cta { padding: clamp(56px,8vw,96px) 24px clamp(80px,9vw,120px); background-color: #000; }
+    .svc-cta__panel {
+      max-width: none; margin: 0 auto; text-align: center;   /* expande até as bordas (gutter de 24px da seção); cantos arredondados preservados */
+      background: linear-gradient(180deg, rgba(20,20,20,0.92), rgba(10,10,10,0.92));
+      border: 1px solid rgba(201,169,97,0.22); border-radius: 28px;
+      padding: clamp(40px,5vw,76px) clamp(24px,4vw,56px);
+      box-shadow: 0 36px 80px -48px rgba(201,169,97,0.3);
+    }
+    .svc-cta__eyebrow { font-family: 'Cinzel',serif; font-size: 12px; letter-spacing: .25em; text-transform: uppercase; color: #C9A961; margin: 0 0 18px; }
+    .svc-cta__title { font-family: 'Cinzel',serif; font-weight: 700; font-size: clamp(24px,3.1vw,38px); letter-spacing: .03em; line-height: 1.28; color: #F5F1E8; margin: 0 auto 18px; max-width: 640px; text-wrap: balance; }
+    .svc-cta__title .gold { color: #C9A961; }
+    .svc-cta__text { font-family: 'Cormorant Garamond',serif; font-size: clamp(17px,1.6vw,20px); line-height: 1.6; color: rgba(245,241,232,0.82); margin: 0 auto 32px; max-width: 46ch; }
+    .svc-cta__buttons { display: flex; flex-wrap: wrap; gap: 14px; justify-content: center; }
+
+    @media (prefers-reduced-motion: reduce) {
+      .svc-tile { opacity: 1; transform: none; filter: none; transition: border-color .3s ease, box-shadow .3s ease; }
+      .svc-tile::before { display: none; }
+      .svc-tile:hover, .svc-tile:focus-visible { transform: none; }
+    }
   </style>
 </head>
 <body class="bg-onyx">
@@ -57,64 +125,72 @@
   <section class="page-hero has-noise">
     <div class="container-page">
       <p class="page-hero__eyebrow">Áreas de Atuação</p>
-      <h1 class="page-hero__title headline-gold">Especialidades sob medida</h1>
+      <h1 class="page-hero__title headline-gold">Excelência técnica e soluções estratégicas.</h1>
       <p class="page-hero__subtitle">
-        Três frentes de atuação conduzidas por advogadas especialistas com rigor técnico e proximidade humana.
+        Quatro frentes de atuação conduzidas por advogadas especialistas com rigor técnico e proximidade humana.
       </p>
     </div>
   </section>
 
-  <section class="section bg-section-default has-noise">
-    <div class="container-page">
-      <div class="services-grid">
-        <a href="servicos/previdenciario.html" class="service-card reveal">
-          <img src="assets/images/icone-previdenciario.png" alt="" aria-hidden="true" class="service-card__icon">
-          <h2 class="service-card__title">Previdenciário</h2>
-          <p class="service-card__lawyer">por Dra. Aline</p>
-          <p class="service-card__desc">Aposentadorias, revisões, planejamento e defesas contra o INSS — administrativa e judicial.</p>
-          <ul class="service-card__list">
-            <li>Aposentadoria por Tempo de Contribuição →</li>
-            <li>Aposentadoria Especial →</li>
-            <li>Planejamento Previdenciário →</li>
-          </ul>
-          <span class="service-card__link">Ver todas as sub-áreas →</span>
-        </a>
+  <section class="svc-section has-noise" aria-label="Áreas de atuação">
+    <div class="svc-bento">
+      <a href="servicos/previdenciario.html" class="svc-tile svc-tile--wide" style="--i:0; --mx:14%; --my:12%" aria-label="Previdenciário — ver sub-áreas">
+        <img src="assets/images/icone-previdenciario.png" alt="" aria-hidden="true" class="svc-tile__icon">
+        <h2 class="svc-tile__name">Previdenciário</h2>
+        <p class="svc-tile__lawyer">por Dra. Aline</p>
+        <p class="svc-tile__desc">Aposentadorias, revisões, planejamento e defesas contra o INSS — nas esferas administrativa e judicial.</p>
+        <ul class="svc-tile__chips">
+          <li>Aposentadorias</li><li>Revisões</li><li>Planejamento</li><li>Defesa no INSS</li>
+        </ul>
+        <span class="svc-tile__link">Ver sub-áreas <span class="ico" aria-hidden="true">&rarr;</span></span>
+      </a>
 
-        <a href="servicos/trabalhista.html" class="service-card reveal">
-          <img src="assets/images/icone-trabalhista.png" alt="" aria-hidden="true" class="service-card__icon">
-          <h2 class="service-card__title">Trabalhista</h2>
-          <p class="service-card__lawyer">por Dra. Heloísa</p>
-          <p class="service-card__desc">Reclamações, defesa de empresas, consultoria preventiva, rescisões e acordos.</p>
-          <ul class="service-card__list">
-            <li>Reclamações Trabalhistas →</li>
-            <li>Defesa de Empresas →</li>
-            <li>Consultoria Preventiva →</li>
-          </ul>
-          <span class="service-card__link">Ver todas as sub-áreas →</span>
-        </a>
+      <a href="servicos/trabalhista.html" class="svc-tile svc-tile--narrow" style="--i:1; --mx:86%; --my:10%" aria-label="Trabalhista — ver sub-áreas">
+        <img src="assets/images/icone-trabalhista.png" alt="" aria-hidden="true" class="svc-tile__icon">
+        <h2 class="svc-tile__name">Trabalhista</h2>
+        <p class="svc-tile__lawyer">por Dra. Heloísa</p>
+        <p class="svc-tile__desc">Reclamações, defesa de empresas, rescisões, acordos e consultoria preventiva.</p>
+        <ul class="svc-tile__chips">
+          <li>Reclamações</li><li>Defesa de empresas</li><li>Rescisões</li>
+        </ul>
+        <span class="svc-tile__link">Ver sub-áreas <span class="ico" aria-hidden="true">&rarr;</span></span>
+      </a>
 
-        <a href="servicos/civil-familia.html" class="service-card reveal">
-          <img src="assets/images/icone-civil-familia.png" alt="" aria-hidden="true" class="service-card__icon">
-          <h2 class="service-card__title">Civil e Família</h2>
-          <p class="service-card__lawyer">por Dra. Aline e Dra. Heloísa</p>
-          <p class="service-card__desc">Divórcios, inventários, guarda, contratos civis e responsabilidade civil — atendimento conjunto.</p>
-          <ul class="service-card__list">
-            <li>Divórcio e Partilha →</li>
-            <li>Inventário e Sucessões →</li>
-            <li>Guarda e Pensão →</li>
-          </ul>
-          <span class="service-card__link">Ver todas as sub-áreas →</span>
-        </a>
-      </div>
+      <a href="servicos/familia.html" class="svc-tile svc-tile--narrow" style="--i:2; --mx:24%; --my:9%" aria-label="Família — ver sub-áreas">
+        <img src="assets/images/icone-civil-familia.png" alt="" aria-hidden="true" class="svc-tile__icon">
+        <h2 class="svc-tile__name">Família</h2>
+        <p class="svc-tile__lawyer">por Dra. Aline e Dra. Heloísa</p>
+        <p class="svc-tile__desc">Divórcio, partilha, inventário, guarda, alimentos e união estável — em atendimento conjunto.</p>
+        <ul class="svc-tile__chips">
+          <li>Divórcio</li><li>Partilha</li><li>Guarda</li><li>Inventário</li>
+        </ul>
+        <span class="svc-tile__link">Ver sub-áreas <span class="ico" aria-hidden="true">&rarr;</span></span>
+      </a>
+
+      <!-- TODO: ícone próprio de Consumidor (reusando icone-rotina.png por ora) -->
+      <a href="servicos/consumidor.html" class="svc-tile svc-tile--wide" style="--i:3; --mx:80%; --my:8%" aria-label="Direito do Consumidor — ver sub-áreas">
+        <img src="assets/images/icone-rotina.png" alt="" aria-hidden="true" class="svc-tile__icon">
+        <h2 class="svc-tile__name">Consumidor</h2>
+        <p class="svc-tile__lawyer">por Dra. Aline e Dra. Heloísa</p>
+        <p class="svc-tile__desc">Cobranças e negativações indevidas, cláusulas abusivas, planos de saúde, bancos e indenizações por danos.</p>
+        <ul class="svc-tile__chips">
+          <li>Cobrança indevida</li><li>Negativação</li><li>Planos de saúde</li><li>Indenizações</li>
+        </ul>
+        <span class="svc-tile__link">Ver sub-áreas <span class="ico" aria-hidden="true">&rarr;</span></span>
+      </a>
     </div>
   </section>
 
-  <section class="section-cta cta-final" id="contato">
-    <div class="container-page reveal">
-      <h2 class="cta-final__title headline-gold">Não tem certeza de qual área cobre o seu caso?</h2>
-      <p class="cta-final__subtitle">Mande sua dúvida pelo WhatsApp. Direcionamos para a advogada certa em minutos.</p>
-      <div class="cta-final__buttons">
-        <a href="https://wa.me/5511984337675" target="_blank" rel="noopener" class="btn btn--gold-solid">Tirar Dúvida no WhatsApp</a>
+  <section class="svc-cta" id="contato" aria-label="Fale com a HAAS">
+    <div class="svc-cta__panel reveal">
+      <p class="svc-cta__eyebrow">Fale com a HAAS</p>
+      <h2 class="svc-cta__title">Protegemos direitos e construímos soluções com <span class="gold">excelência jurídica</span>.</h2>
+      <p class="svc-cta__text">Mande sua dúvida pelo WhatsApp — direcionamos você para a advogada certa em minutos.</p>
+      <div class="svc-cta__buttons">
+        <a href="https://wa.me/5511984337675" target="_blank" rel="noopener" class="btn btn--gold-solid btn--lead" aria-label="Tirar dúvida pelo WhatsApp">
+          <span class="btn__label">Tirar Dúvida no WhatsApp</span>
+          <span class="btn__icon" aria-hidden="true">&rarr;</span>
+        </a>
         <a href="tel:+551149015616" class="btn btn--white-ghost">Ligar Agora</a>
       </div>
     </div>
@@ -166,5 +242,26 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
   <script src="assets/js/main.js"></script>
   <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+  <script>
+    /* Bento (escopo servicos.html): entrada em stagger + spotlight no hover.
+       Independente do main.js — os tiles NÃO usam .reveal. */
+    (() => {
+      const tiles = document.querySelectorAll('.svc-bento .svc-tile');
+      if (!tiles.length) return;
+
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach((e) => {
+            if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); }
+          });
+        }, { rootMargin: '0px 0px -10% 0px' });
+        tiles.forEach((t) => io.observe(t));
+      } else {
+        tiles.forEach((t) => t.classList.add('is-in'));
+      }
+
+      // (sem rastreio de cursor — o glow é fixo por card via --mx/--my no HTML)
+    })();
+  </script>
 </body>
 </html>

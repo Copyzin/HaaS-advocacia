@@ -16,12 +16,6 @@
   'use strict';
 
   const STORAGE_KEY = 'haas_intro_seen';
-  const AUDIO_KEY = 'haas_intro_audio';
-  // Volume default do áudio da intro quando o usuário ativa o som. Valor
-  // moderado (50%) — som cinematográfico bem audível sem assustar usuário
-  // que esquece o headphone no máximo. Usuário não tem slider de volume,
-  // só toggle; se quiser ajustar, usa o controle nativo do SO.
-  const INTRO_AUDIO_VOLUME = 0.5;
   // REDUCED_MOTION é avaliado live: usuário pode trocar a preferência do SO
   // no meio da sessão (ex.: Settings → Accessibility no Android/iOS) e o site
   // precisa reagir sem reload. Mantido como `let` para permitir update do listener.
@@ -36,15 +30,19 @@
   // F5 / Ctrl+R / Ctrl+Shift+R sempre tocam a intro de novo.
   // Navegação interna (link clicado, back/forward) respeita o gate.
   function isPageReload() {
+    // Método 1: Navigation Timing Level 2 (Chrome/Firefox/Edge modernos)
     try {
       const nav = performance.getEntriesByType('navigation')[0];
       if (nav && nav.type) return nav.type === 'reload';
-      // Fallback antigo (Safari, navegadores legados)
-      if (performance.navigation) {
-        return performance.navigation.type === 1; // TYPE_RELOAD
-      }
-    } catch (err) {}
-    return false;
+    } catch (e) {}
+    // Método 2: API legada (Safari < 15, browsers antigos)
+    try {
+      if (performance.navigation) return performance.navigation.type === 1;
+    } catch (e) {}
+    // Método 3: heurística via referrer — F5 e visita direta têm referrer vazio;
+    // navegação interna tem referrer preenchido.
+    // Se ambas as APIs falharam, melhor tocar a intro do que suprimi-la.
+    return !document.referrer;
   }
 
   /* -----------------------------------------------------------------------
@@ -84,46 +82,9 @@
     const stage = $('.intro-stage');
     const video = $('.intro-video');
     const skip = $('.intro-skip');
-    const audioBtn = $('.intro-audio');
     const header = $('.site-header');
     const heroContent = $('.hero__content');
-    const heroBg = $('.hero__bg');
     const body = document.body;
-
-    // Volume default antes de qualquer play(). Define enquanto o vídeo ainda
-    // está muted, então não há som audível agora mesmo — só prepara o nível
-    // pra quando o usuário clicar no botão e desmutar.
-    if (video) { try { video.volume = INTRO_AUDIO_VOLUME; } catch (err) {} }
-
-    // Estado do áudio (mute/unmute toggle). Default: muted (autoplay funciona).
-    // Persistido em sessionStorage pra sobreviver a F5 dentro da sessão.
-    function setAudioState(on, persist) {
-      if (!video) return;
-      video.muted = !on;
-      if (audioBtn) {
-        audioBtn.classList.toggle('is-on', on);
-        audioBtn.setAttribute('aria-pressed', on ? 'true' : 'false');
-        audioBtn.setAttribute('aria-label', on ? 'Silenciar intro' : 'Ativar som da intro');
-      }
-      if (persist) {
-        try {
-          if (on) sessionStorage.setItem(AUDIO_KEY, 'on');
-          else sessionStorage.removeItem(AUDIO_KEY);
-        } catch (err) {}
-      }
-    }
-
-    if (audioBtn) {
-      audioBtn.addEventListener('click', () => {
-        setAudioState(video.muted, true);
-      });
-      audioBtn.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
-          setAudioState(video.muted, true);
-        }
-      });
-    }
 
     // No F5, navegadores tentam restaurar a posição anterior — bloqueamos isso
     // pra garantir que, ao final da intro, o usuário SEMPRE acorda no hero.
@@ -147,10 +108,7 @@
       forceScrollToHero();
     }
 
-    // Se a estrutura da intro não existir, apenas revelar header e hero
-    // (e ainda assim sincronizar o bg pra evitar flash preto se o usuário rolar).
     if (!stage || !video) {
-      syncHeroToLastFrame(video, heroBg);
       revealFinalState(header, heroContent);
       return;
     }
@@ -162,7 +120,6 @@
     if (honorHash || REDUCED_MOTION || (alreadySeen && !reloaded)) {
       stage.style.display = 'none';
       body.classList.remove('is-intro-locked');
-      syncHeroToLastFrame(video, heroBg);
       revealFinalState(header, heroContent);
       if (!honorHash) {
         // Garante que o usuário comece no hero quando NÃO há intenção explícita
@@ -178,61 +135,64 @@
 
     body.classList.add('is-intro-locked');
 
-    let finished = false;
+    // ---------------------------------------------------------------------
+    // Reveal coreografado.
+    //
+    // O VÍDEO já contém a transição até o fundo: seu último frame É o
+    // background-oficial.png (fundo estático do hero). Por isso NÃO há mais
+    // crossfade de poster — apenas dissolvemos o overlay do vídeo para revelar
+    // o hero por baixo (mesma imagem → handoff imperceptível).
+    //
+    // As animações do hero (header + texto) começam REVEAL_LEAD segundos ANTES
+    // do vídeo terminar e ficam visíveis conforme o overlay dissolve — o texto
+    // "chega" sincronizado com o fim do vídeo, sem competir com ele.
+    // ---------------------------------------------------------------------
+    const REVEAL_LEAD = 1.1;   // segundos antes do fim do vídeo
+    let revealed = false;
+    let revealTimer = 0;
 
-    const finish = () => {
-      if (finished) return;
-      finished = true;
-
-      // Congela o vídeo da intro no último frame
-      try {
-        if (video.duration && isFinite(video.duration)) {
-          // -0.05s evita que o navegador pule pro frame 0 ao atingir a duração exata
-          video.currentTime = Math.max(0, video.duration - 0.05);
-        }
-        video.pause();
-      } catch (err) {}
-
-      // Sincroniza o vídeo de background do hero ao mesmo último frame
-      // ANTES de animar o stage out. Isso elimina o "salto" entre os dois vídeos.
-      syncHeroToLastFrame(video, heroBg);
-
-      // Aguarda um paint pra garantir que o seek do hero foi renderizado,
-      // então inicia a transição. Antes disso, redireciona pro topo (hero)
-      // pra cobrir qualquer scroll restorado pelo browser durante o playback.
+    const startReveal = () => {
+      if (revealed) return;
+      revealed = true;
+      clearTimeout(revealTimer);
+      try { sessionStorage.setItem(STORAGE_KEY, '1'); } catch (err) {}
       forceScrollToHero();
 
       requestAnimationFrame(() => {
-        // Esconde skip + audio button com fade próprio
+        // Esconde skip button com fade próprio
         if (skip) {
           skip.style.transition = 'opacity 300ms ease-out';
           skip.style.opacity = '0';
           skip.style.pointerEvents = 'none';
         }
-        if (audioBtn) {
-          audioBtn.style.transition = 'opacity 300ms ease-out';
-          audioBtn.style.opacity = '0';
-          audioBtn.style.pointerEvents = 'none';
-        }
 
-        // Stage fade-out longo (1200ms via CSS) — funciona como camada de
-        // "dim" enquanto desaparece, mascarando o pop-in dos elementos do hero.
+        // Dissolve do overlay do vídeo (1200ms via CSS) revelando o hero.
         stage.classList.add('is-done');
-        setTimeout(() => {
-          stage.style.display = 'none';
-          body.classList.remove('is-intro-locked');
-          // Garantia final: ao destravar o scroll, força o usuário no hero.
-          forceScrollToHero();
-        }, 1300);
 
-        // Header desce + hero fade-up (GSAP timeline) acontecem POR BAIXO
-        // do stage que está fazendo fade-out — o usuário vê a tela escurecer
-        // suavemente e os elementos surgirem juntos.
+        // Entrada do hero JUNTO com o dissolve — começa ~1.1s antes do fim do
+        // vídeo e assenta logo após ele terminar.
         animateEntrance(header, heroContent);
 
-        // Marca como visto (não-bloqueante)
-        try { sessionStorage.setItem(STORAGE_KEY, '1'); } catch (err) {}
+        // Remove o stage ao fim do dissolve. video.pause() é redundante após o
+        // 'ended' natural, mas garante parada limpa quando o usuário dá skip.
+        setTimeout(() => {
+          try { video.pause(); } catch (err) {}
+          stage.style.display = 'none';
+          body.classList.remove('is-intro-locked');
+          forceScrollToHero();
+        }, 1300);
       });
+    };
+
+    // Agenda o reveal para REVEAL_LEAD antes do fim, recomputando a partir do
+    // tempo real de reprodução. Recomputar a cada 'playing' torna o agendamento
+    // robusto a buffering (cada retomada recalcula com o currentTime atual).
+    const scheduleReveal = () => {
+      if (revealed || !video.duration || !isFinite(video.duration)) return;
+      const remaining = video.duration - video.currentTime - REVEAL_LEAD;
+      clearTimeout(revealTimer);
+      if (remaining <= 0) { startReveal(); return; }
+      revealTimer = setTimeout(startReveal, remaining * 1000);
     };
 
     // Indicador de loading enquanto vídeo carrega
@@ -240,20 +200,9 @@
       stage.classList.add('is-playing');
       const playPromise = video.play();
       if (playPromise && typeof playPromise.catch === 'function') {
-        playPromise.catch(() => {
-          // Autoplay foi bloqueado — pular intro
-          finish();
-        });
+        // Autoplay bloqueado → revela direto (sem intro).
+        playPromise.catch(() => startReveal());
       }
-      // Se na sessão anterior o usuário ativou som, tenta reativar agora.
-      // O browser pode reverter pra muted silenciosamente em alguns casos —
-      // se acontecer, o botão continua mostrando o estado off e o usuário
-      // clica de novo. Sem panic, sem erro.
-      try {
-        if (sessionStorage.getItem(AUDIO_KEY) === 'on') {
-          setAudioState(true, false);
-        }
-      } catch (err) {}
     };
 
     if (video.readyState >= 3) {
@@ -262,66 +211,32 @@
       video.addEventListener('canplaythrough', onCanPlay, { once: true });
     }
 
-    // Eventos de término
-    video.addEventListener('ended', finish, { once: true });
+    // Gatilhos do reveal
+    video.addEventListener('loadedmetadata', scheduleReveal);
+    video.addEventListener('playing', scheduleReveal);
+    video.addEventListener('waiting', () => clearTimeout(revealTimer));
+    video.addEventListener('timeupdate', () => {               // backstop do agendamento
+      if (!revealed && video.duration && isFinite(video.duration) &&
+          video.currentTime >= video.duration - REVEAL_LEAD) {
+        startReveal();
+      }
+    });
+    video.addEventListener('ended', startReveal, { once: true });  // backstop final
 
     if (skip) {
-      skip.addEventListener('click', finish);
+      skip.addEventListener('click', startReveal);
       skip.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          finish();
+          startReveal();
         }
       });
     }
 
-    // Safety: se o vídeo NUNCA começa a tocar (404, codec, autoplay bloqueado pelo
-    // browser sem capturar via play().catch), pula a intro em 20s.
-    // O timeout é limpo no primeiro `playing` — ou seja, uma vez que o vídeo
-    // começou a rodar, deixamos ele tocar até o `ended` natural sem cortar.
-    const safety = setTimeout(() => { if (!finished) finish(); }, 20000);
+    // Safety: se o vídeo NUNCA começa a tocar (404, codec, autoplay bloqueado
+    // sem disparar play().catch), revela em 20s. Limpo no primeiro `playing`.
+    const safety = setTimeout(() => { if (!revealed) startReveal(); }, 20000);
     video.addEventListener('playing', () => clearTimeout(safety), { once: true });
-  }
-
-  function syncHeroToLastFrame(introVideo, heroBg) {
-    if (!heroBg) return;
-    const heroVideo = heroBg.querySelector('video');
-    if (!heroVideo) return;
-
-    // Define o tempo-alvo: último frame menos 0.05s pra evitar wraparound do loop
-    // ou reset pra 0 que alguns navegadores fazem ao atingir duration exata.
-    const targetTime = () => {
-      const d = (introVideo && isFinite(introVideo.duration)) ? introVideo.duration
-              : (isFinite(heroVideo.duration) ? heroVideo.duration : 0);
-      return Math.max(0, d - 0.05);
-    };
-
-    const seek = () => {
-      try {
-        heroVideo.pause();
-        heroVideo.currentTime = targetTime();
-      } catch (err) {}
-    };
-
-    // Força preload mesmo quando o hero está fora da viewport (caso comum em
-    // navegação direta pra #sobre, #servicos, etc.). Sem isso, alguns browsers
-    // postergam o load do vídeo até ele entrar em tela — e o usuário vê o hero
-    // preto quando finalmente rola pra cima.
-    if (heroVideo.readyState === 0) {
-      try { heroVideo.load(); } catch (err) {}
-    }
-
-    // Tenta seek o quanto antes; e amarra fallbacks pra GARANTIR que o último
-    // frame seja renderizado assim que houver dados suficientes. Cobrimos os 3
-    // marcos do ciclo de carregamento (metadata → primeiro frame → can-play)
-    // porque diferentes browsers (Safari, Chrome, Firefox) renderizam o frame
-    // pós-seek em momentos distintos do pipeline.
-    if (heroVideo.readyState >= 1) seek();
-    if (heroVideo.readyState < 4) {
-      heroVideo.addEventListener('loadedmetadata', seek, { once: true });
-      heroVideo.addEventListener('loadeddata', seek, { once: true });
-      heroVideo.addEventListener('canplay', seek, { once: true });
-    }
   }
 
   function revealFinalState(header, heroContent) {
@@ -907,6 +822,41 @@
   }
 
   /* -----------------------------------------------------------------------
+     HERO SUBTITLE EXPAND / COLLAPSE (mobile only)
+     ----------------------------------------------------------------------- */
+
+  function initSubtitleToggle() {
+    const toggle = $('.hero__subtitle-toggle');
+    const subtitle = document.getElementById('hero-subtitle-text');
+    if (!toggle || !subtitle) return;
+
+    const mq = window.matchMedia('(max-width: 1023px)');
+
+    toggle.addEventListener('click', () => {
+      const expanded = toggle.getAttribute('aria-expanded') === 'true';
+      const next = !expanded;
+      toggle.setAttribute('aria-expanded', String(next));
+      subtitle.classList.toggle('is-expanded', next);
+      toggle.querySelector('.hero__subtitle-toggle__label').textContent =
+        next ? 'Mostrar menos' : 'Mostrar mais';
+    });
+
+    // If the window grows to desktop, reset collapsed state so text isn't clipped
+    const onBreakpoint = () => {
+      if (!mq.matches) {
+        subtitle.classList.remove('is-expanded');
+        toggle.setAttribute('aria-expanded', 'false');
+        toggle.querySelector('.hero__subtitle-toggle__label').textContent = 'Mostrar mais';
+      }
+    };
+    try {
+      mq.addEventListener('change', onBreakpoint);
+    } catch (_) {
+      mq.addListener(onBreakpoint); // Safari 13- fallback
+    }
+  }
+
+  /* -----------------------------------------------------------------------
      INIT
      ----------------------------------------------------------------------- */
 
@@ -920,6 +870,7 @@
     initMobileCTAs();
     initReveal();
     initMobileMenu();
+    initSubtitleToggle();
     initPreciseSectionScroll();
   }
 

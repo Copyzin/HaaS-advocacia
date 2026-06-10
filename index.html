@@ -7,11 +7,14 @@
        pra que F5 nunca tente restaurar uma posição de scroll antiga.
        A intro toca, e ao final o usuário SEMPRE acorda no hero. -->
   <script>try { history.scrollRestoration = 'manual'; } catch (e) {}</script>
-  <title>HAAS Advocacia e Consultoria Jurídica — Excelência em Previdenciário, Trabalhista, Civil e Família</title>
-  <meta name="description" content="Escritório HAAS Advocacia. Direito previdenciário com Dra. Aline, trabalhista com Dra. Heloísa, e atuação conjunta em civil e família. Excelência, ética e tradição.">
+  <title>HAAS Advocacia e Consultoria Jurídica — Trabalhista, Previdenciário, Família e Direito do Consumidor</title>
+  <meta name="description" content="Escritório HAAS Advocacia. Direito Trabalhista com Dra. Heloísa, Previdenciário com Dra. Aline, e atuação conjunta em Família e Direito do Consumidor. Excelência, ética e tradição.">
 
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="assets/images/favicon.png">
+
+  <!-- Preload do fundo do hero (= último frame do vídeo de intro) -->
+  <link rel="preload" as="image" href="assets/images/background-oficial.png">
 
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -50,6 +53,53 @@
   <!-- Custom styles + tokens -->
   <link rel="stylesheet" href="assets/css/styles.css">
 
+  <style>
+    /* Bento "Áreas de Atuação" — MESMO padrão da aba Serviços (escopo: index.html).
+       Glow FIXO por card (--mx/--my no HTML), revelado só no hover; entrada em stagger.
+       Fica dentro de .container-page, então o grid não cria largura/padding próprios. */
+    .svc-bento { display: grid; grid-template-columns: 1fr; gap: 18px; }
+    @media (min-width: 768px) { .svc-bento { grid-template-columns: repeat(2,1fr); gap: 20px; } }
+    @media (min-width: 1024px) {
+      .svc-bento { grid-template-columns: repeat(6,1fr); gap: 22px; }
+      .svc-tile--wide { grid-column: span 4; }
+      .svc-tile--narrow { grid-column: span 2; }
+    }
+    .svc-tile {
+      position: relative; isolation: isolate; overflow: hidden;
+      display: flex; flex-direction: column; min-height: 232px;
+      padding: clamp(24px,2.4vw,36px);
+      background: #141414; border: 1px solid rgba(201,169,97,0.16);
+      border-radius: 24px; color: #F5F1E8; text-decoration: none;
+      opacity: 0; transform: translateY(26px); filter: blur(6px);
+      transition: opacity .7s cubic-bezier(.16,1,.3,1), transform .7s cubic-bezier(.16,1,.3,1),
+                  filter .7s cubic-bezier(.16,1,.3,1), border-color .4s ease, box-shadow .4s ease;
+      transition-delay: calc(var(--i,0) * 90ms);
+      will-change: transform, opacity;
+    }
+    .svc-tile.is-in { opacity: 1; transform: translateY(0); filter: blur(0); }
+    .svc-tile::before {
+      content: ""; position: absolute; inset: 0; z-index: -1; border-radius: inherit;
+      background: radial-gradient(360px circle at var(--mx,50%) var(--my,8%), rgba(201,169,97,0.15), transparent 65%);
+      opacity: 0; transition: opacity .45s ease;
+    }
+    .svc-tile:hover, .svc-tile:focus-visible { transform: translateY(-4px); border-color: rgba(201,169,97,0.5); box-shadow: 0 26px 54px -30px rgba(201,169,97,0.4); outline: none; }
+    .svc-tile:hover::before, .svc-tile:focus-visible::before { opacity: 1; }
+    .svc-tile__icon { width: 46px; height: 46px; margin: 0 0 20px; }
+    .svc-tile__name { font-family: 'Cinzel',serif; font-weight: 700; font-size: clamp(20px,1.7vw,26px); letter-spacing: .06em; text-transform: uppercase; margin: 0 0 6px; }
+    .svc-tile__lawyer { font-family: 'Cormorant Garamond',serif; font-style: italic; font-size: 16px; color: #C9A961; margin: 0 0 16px; }
+    .svc-tile__desc { font-family: 'Cormorant Garamond',serif; font-size: 17px; line-height: 1.55; color: rgba(245,241,232,0.8); margin: 0 0 18px; max-width: 54ch; }
+    .svc-tile__chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 24px; padding: 0; list-style: none; }
+    .svc-tile__chips li { font-family: 'Inter',sans-serif; font-size: 12px; color: rgba(245,241,232,0.74); border: 1px solid rgba(201,169,97,0.22); border-radius: 999px; padding: 6px 12px; }
+    .svc-tile__link { margin-top: auto; display: inline-flex; align-items: center; gap: 10px; font-family: 'Cinzel',serif; font-size: 12px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: #C9A961; }
+    .svc-tile__link .ico { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 999px; border: 1px solid rgba(201,169,97,0.4); transition: transform .35s cubic-bezier(.34,1.56,.64,1), background .3s ease, border-color .3s ease; }
+    .svc-tile:hover .svc-tile__link .ico, .svc-tile:focus-visible .svc-tile__link .ico { transform: translateX(3px); background: rgba(201,169,97,0.14); border-color: #C9A961; }
+    @media (prefers-reduced-motion: reduce) {
+      .svc-tile { opacity: 1; transform: none; filter: none; transition: border-color .3s ease, box-shadow .3s ease; }
+      .svc-tile::before { display: none; }
+      .svc-tile:hover, .svc-tile:focus-visible { transform: none; }
+    }
+  </style>
+
   <!-- Schema.org JSON-LD -->
   <script type="application/ld+json">
   {
@@ -61,10 +111,10 @@
     "telephone": "+55-11-4901-5616",
     "email": "haas.adv@outlook.com",
     "areaServed": "Brasil",
-    "knowsAbout": ["Direito Previdenciário", "Direito Trabalhista", "Direito Civil", "Direito de Família"],
+    "knowsAbout": ["Direito Trabalhista", "Direito Previdenciário", "Direito de Família", "Direito do Consumidor"],
     "employee": [
-      { "@type": "Attorney", "name": "Dra. Aline", "knowsAbout": "Direito Previdenciário" },
-      { "@type": "Attorney", "name": "Dra. Heloísa", "knowsAbout": "Direito Trabalhista" }
+      { "@type": "Attorney", "name": "Dra. Aline Britto de Albuquerque", "knowsAbout": ["Direito Previdenciário", "Direito de Família", "Direito do Consumidor"] },
+      { "@type": "Attorney", "name": "Dra. Heloísa G. Pacheco Moretti", "knowsAbout": ["Direito Trabalhista", "Direito de Família", "Direito do Consumidor"] }
     ]
   }
   </script>
@@ -77,7 +127,7 @@
        Spec completa: DESIGN.md
        ===================================================================== -->
   <div class="intro-stage" aria-hidden="false">
-    <div class="intro-loader" aria-hidden="true">HAAS</div>
+    <div class="intro-loader" aria-hidden="true"><img src="assets/images/logo-transparent.png" alt=""></div>
     <video class="intro-video"
            autoplay muted playsinline preload="auto"
            aria-label="Animação de introdução HAAS Advocacia">
@@ -85,17 +135,6 @@
            <source src="assets/video/intro-mobile.mp4" media="(max-width: 1023px)" type="video/mp4"> -->
       <source src="assets/video/intro-desktop.mp4" type="video/mp4">
     </video>
-    <button class="intro-audio" type="button"
-            aria-label="Ativar som da intro"
-            aria-pressed="false"
-            tabindex="0">
-      <svg class="intro-audio__icon intro-audio__icon--off" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>
-      </svg>
-      <svg class="intro-audio__icon intro-audio__icon--on" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>
-      </svg>
-    </button>
     <button class="intro-skip" type="button"
             aria-label="Pular animação de introdução"
             tabindex="0">
@@ -133,22 +172,32 @@
     </div>
   </header>
 
-  <!-- Mobile drawer -->
+  <!-- Mobile drawer — Índice Editorial: conteúdo vive dentro da janela da
+       moldura, links numerados separados por fios gold (mesma linguagem do
+       Contato/FAQ), motto Cormorant fechando junto às aspas do frame. -->
   <nav class="nav-drawer" id="nav-drawer" aria-label="Menu mobile">
     <button class="nav-drawer__close" type="button" aria-label="Fechar menu">×</button>
-    <a href="index.html">Início</a>
-    <a href="#sobre">Sobre</a>
-    <a href="servicos.html">Serviços</a>
-    <a href="blog/index.html">Blog</a>
-    <a href="#contato">Contato</a>
-    <a href="https://wa.me/5511984337675" target="_blank" rel="noopener"
-       class="nav-drawer__cta-whatsapp"
-       aria-label="Falar com a HAAS via WhatsApp">
-      <svg class="nav-drawer__cta-icon" viewBox="0 0 24 24" aria-hidden="true">
-        <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.95.51 3.78 1.41 5.36L2 22l4.86-1.51a9.92 9.92 0 0 0 5.18 1.4h.01c5.46 0 9.91-4.45 9.91-9.92S17.5 2 12.04 2zm5.79 14.18c-.24.68-1.39 1.3-1.94 1.38-.5.07-1.14.1-1.83-.12-.42-.13-.97-.32-1.66-.61-2.93-1.27-4.84-4.22-4.99-4.42-.15-.2-1.18-1.57-1.18-3 0-1.42.75-2.13 1.02-2.42.27-.29.59-.36.78-.36.2 0 .4 0 .57.01.18.01.42-.07.66.5.24.58.83 2 .9 2.14.07.14.12.31.02.5-.1.2-.15.31-.29.49-.15.17-.31.39-.44.52-.15.15-.3.31-.13.6.17.29.76 1.26 1.63 2.04 1.12 1 2.06 1.31 2.35 1.46.29.15.46.13.63-.08.17-.2.73-.85.92-1.15.2-.29.4-.24.66-.15.27.1 1.7.8 1.98.95.29.15.49.22.56.34.07.13.07.71-.17 1.39z"/>
-      </svg>
-      <span>Falar no WhatsApp</span>
-    </a>
+    <div class="nav-drawer__inner">
+      <p class="nav-drawer__eyebrow">Navegação</p>
+      <ul class="nav-drawer__list">
+        <li><a href="index.html"><span class="nav-drawer__num">01</span><span class="nav-drawer__label">Início</span></a></li>
+        <li><a href="#sobre"><span class="nav-drawer__num">02</span><span class="nav-drawer__label">Sobre</span></a></li>
+        <li><a href="servicos.html"><span class="nav-drawer__num">03</span><span class="nav-drawer__label">Serviços</span></a></li>
+        <li><a href="blog/index.html"><span class="nav-drawer__num">04</span><span class="nav-drawer__label">Blog</span></a></li>
+        <li><a href="#contato"><span class="nav-drawer__num">05</span><span class="nav-drawer__label">Contato</span></a></li>
+      </ul>
+      <div class="nav-drawer__foot">
+        <a href="https://wa.me/5511984337675" target="_blank" rel="noopener"
+           class="nav-drawer__cta-whatsapp"
+           aria-label="Falar com a HAAS via WhatsApp">
+          <svg class="nav-drawer__cta-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.95.51 3.78 1.41 5.36L2 22l4.86-1.51a9.92 9.92 0 0 0 5.18 1.4h.01c5.46 0 9.91-4.45 9.91-9.92S17.5 2 12.04 2zm5.79 14.18c-.24.68-1.39 1.3-1.94 1.38-.5.07-1.14.1-1.83-.12-.42-.13-.97-.32-1.66-.61-2.93-1.27-4.84-4.22-4.99-4.42-.15-.2-1.18-1.57-1.18-3 0-1.42.75-2.13 1.02-2.42.27-.29.59-.36.78-.36.2 0 .4 0 .57.01.18.01.42-.07.66.5.24.58.83 2 .9 2.14.07.14.12.31.02.5-.1.2-.15.31-.29.49-.15.17-.31.39-.44.52-.15.15-.3.31-.13.6.17.29.76 1.26 1.63 2.04 1.12 1 2.06 1.31 2.35 1.46.29.15.46.13.63-.08.17-.2.73-.85.92-1.15.2-.29.4-.24.66-.15.27.1 1.7.8 1.98.95.29.15.49.22.56.34.07.13.07.71-.17 1.39z"/>
+          </svg>
+          <span>WhatsApp</span>
+        </a>
+        <p class="nav-drawer__motto">Ética, tradição e excelência.</p>
+      </div>
+    </div>
   </nav>
 
   <!-- =====================================================================
@@ -156,30 +205,35 @@
        ===================================================================== -->
   <section class="hero" id="hero" aria-label="Apresentação HAAS Advocacia">
     <div class="hero__bg" aria-hidden="true">
-      <!-- Background do hero = ultimo frame do video da intro, congelado.
-           Sem autoplay/loop: nao queremos competir com o video da intro nem
-           expor um frame diferente quando o stage faz fade-out.
-           main.js faz seek pra (duration - 0.05) e pause() no momento certo. -->
-      <video muted playsinline preload="auto">
-        <!-- TODO: gerar variante mobile-optimized:
-             <source src="assets/video/intro-mobile.mp4" media="(max-width: 1023px)" type="video/mp4"> -->
-        <source src="assets/video/intro-desktop.mp4" type="video/mp4">
-      </video>
+      <div class="hero__bg-final"></div>
     </div>
 
     <div class="hero__content">
       <p class="hero__eyebrow">HAAS Advocacia e Consultoria Jurídica</p>
-      <h1 class="hero__headline headline-gold">Excelência jurídica que protege a&nbsp;sua história</h1>
-      <p class="hero__subtitle">
-        Direito previdenciário, trabalhista, civil e família — com o rigor técnico e a presença humana que cada causa exige.
-      </p>
+      <h1 class="hero__headline">
+        <span class="hero__headline-lead">Soluções jurídicas seguras</span>
+        <span class="hero__headline-areas">em Direito <span class="hero__area">Trabalhista</span>, <span class="hero__area">Previdenciário</span>, <span class="hero__area">Família</span> e <span class="hero__area">Consumidor</span></span>
+      </h1>
+      <div class="hero__subtitle-wrap">
+        <p class="hero__subtitle" id="hero-subtitle-text">
+          Atuação especializada nas áreas Trabalhista, Previdenciária, Família e Direito do Consumidor, oferecendo soluções jurídicas personalizadas, seguras e eficientes. Com mais de 15 anos de experiência, alia excelência técnica, atendimento humanizado e atuação estratégica para defender os direitos de trabalhadores, segurados, aposentados, pensionistas, consumidores e famílias, buscando sempre os melhores resultados com ética, transparência e comprometimento.
+        </p>
+        <button class="hero__subtitle-toggle" type="button"
+                aria-expanded="false" aria-controls="hero-subtitle-text">
+          <span class="hero__subtitle-toggle__label">Mostrar mais</span>
+          <svg class="hero__subtitle-toggle__arrow" viewBox="0 0 12 7" aria-hidden="true" width="12" height="7">
+            <polyline points="1,1 6,6 11,1" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+      </div>
       <div class="hero__ctas">
         <a href="https://wa.me/5511984337675" target="_blank" rel="noopener"
-           class="btn btn--gold-solid"
+           class="btn btn--gold-solid btn--lead"
            aria-label="Agendar consulta via WhatsApp">
-          Agendar Consulta
+          <span class="btn__label">Agendar Consulta</span>
+          <span class="btn__icon" aria-hidden="true">&rarr;</span>
         </a>
-        <a href="#servicos" class="btn btn--white-ghost">
+        <a href="#servicos" class="btn btn--gold-ghost">
           Áreas de Atuação
         </a>
       </div>
@@ -193,56 +247,48 @@
     <div class="container-page">
       <header class="section-head reveal">
         <p class="section-head__eyebrow">Áreas de Atuação</p>
-        <h2 class="section-head__title">Especialidades sob medida para cada momento</h2>
+        <h2 class="section-head__title" style="font-size: clamp(20px, 4.5vw, 56px);">Excelência técnica e soluções estratégicas.</h2>
         <p class="section-head__subtitle">
           Cada área conta com uma especialista dedicada, com atuação técnica de alto rigor e atendimento próximo a quem confia no escritório.
         </p>
       </header>
 
-      <div class="services-grid">
-        <a href="servicos/previdenciario.html" class="service-card reveal">
-          <img src="assets/images/icone-previdenciario.png" alt="" aria-hidden="true" class="service-card__icon">
-          <h3 class="service-card__title">Previdenciário</h3>
-          <p class="service-card__lawyer">por Dra. Aline</p>
-          <p class="service-card__desc">
-            Aposentadorias, revisões, planejamento e defesas administrativas e judiciais contra o INSS, com o rigor técnico que cada benefício exige.
-          </p>
-          <ul class="service-card__list">
-            <li>Aposentadoria por Tempo de Contribuição →</li>
-            <li>Planejamento Previdenciário →</li>
-            <li>Defesa contra o INSS →</li>
-          </ul>
-          <span class="service-card__link">Saiba mais →</span>
+      <div class="svc-bento">
+        <a href="servicos/previdenciario.html" class="svc-tile svc-tile--wide" style="--i:0; --mx:14%; --my:12%" aria-label="Previdenciário — ver sub-áreas">
+          <img src="assets/images/icone-previdenciario.png" alt="" aria-hidden="true" class="svc-tile__icon">
+          <h3 class="svc-tile__name">Previdenciário</h3>
+          <p class="svc-tile__lawyer">por Dra. Aline</p>
+          <p class="svc-tile__desc">Aposentadorias, revisões, planejamento e defesas contra o INSS — nas esferas administrativa e judicial.</p>
+          <ul class="svc-tile__chips"><li>Aposentadorias</li><li>Revisões</li><li>Planejamento</li><li>Defesa no INSS</li></ul>
+          <span class="svc-tile__link">Ver sub-áreas <span class="ico" aria-hidden="true">&rarr;</span></span>
         </a>
 
-        <a href="servicos/trabalhista.html" class="service-card reveal">
-          <img src="assets/images/icone-trabalhista.png" alt="" aria-hidden="true" class="service-card__icon">
-          <h3 class="service-card__title">Trabalhista</h3>
-          <p class="service-card__lawyer">por Dra. Heloísa</p>
-          <p class="service-card__desc">
-            Reclamações trabalhistas, defesa de empresas, acordos, consultoria preventiva e cálculo de rescisão com atenção a cada detalhe do contrato.
-          </p>
-          <ul class="service-card__list">
-            <li>Reclamações Trabalhistas →</li>
-            <li>Defesa de Empresas →</li>
-            <li>Consultoria Preventiva →</li>
-          </ul>
-          <span class="service-card__link">Saiba mais →</span>
+        <a href="servicos/trabalhista.html" class="svc-tile svc-tile--narrow" style="--i:1; --mx:86%; --my:10%" aria-label="Trabalhista — ver sub-áreas">
+          <img src="assets/images/icone-trabalhista.png" alt="" aria-hidden="true" class="svc-tile__icon">
+          <h3 class="svc-tile__name">Trabalhista</h3>
+          <p class="svc-tile__lawyer">por Dra. Heloísa</p>
+          <p class="svc-tile__desc">Reclamações, defesa de empresas, rescisões, acordos e consultoria preventiva.</p>
+          <ul class="svc-tile__chips"><li>Reclamações</li><li>Defesa de empresas</li><li>Rescisões</li></ul>
+          <span class="svc-tile__link">Ver sub-áreas <span class="ico" aria-hidden="true">&rarr;</span></span>
         </a>
 
-        <a href="servicos/civil-familia.html" class="service-card reveal">
-          <img src="assets/images/icone-civil-familia.png" alt="" aria-hidden="true" class="service-card__icon">
-          <h3 class="service-card__title">Civil e Família</h3>
-          <p class="service-card__lawyer">por Dra. Aline e Dra. Heloísa</p>
-          <p class="service-card__desc">
-            Divórcios, inventários, guarda, contratos civis e responsabilidade civil — atendimento conjunto das duas advogadas em momentos delicados da vida.
-          </p>
-          <ul class="service-card__list">
-            <li>Divórcio e Partilha →</li>
-            <li>Inventário e Sucessões →</li>
-            <li>Guarda e Pensão →</li>
-          </ul>
-          <span class="service-card__link">Saiba mais →</span>
+        <a href="servicos/familia.html" class="svc-tile svc-tile--narrow" style="--i:2; --mx:24%; --my:9%" aria-label="Família — ver sub-áreas">
+          <img src="assets/images/icone-civil-familia.png" alt="" aria-hidden="true" class="svc-tile__icon">
+          <h3 class="svc-tile__name">Família</h3>
+          <p class="svc-tile__lawyer">por Dra. Aline e Dra. Heloísa</p>
+          <p class="svc-tile__desc">Divórcio, partilha, inventário, guarda, alimentos e união estável — em atendimento conjunto.</p>
+          <ul class="svc-tile__chips"><li>Divórcio</li><li>Partilha</li><li>Guarda</li><li>Inventário</li></ul>
+          <span class="svc-tile__link">Ver sub-áreas <span class="ico" aria-hidden="true">&rarr;</span></span>
+        </a>
+
+        <!-- TODO: ícone próprio de Consumidor (reusando icone-rotina.png por ora) -->
+        <a href="servicos/consumidor.html" class="svc-tile svc-tile--wide" style="--i:3; --mx:80%; --my:8%" aria-label="Direito do Consumidor — ver sub-áreas">
+          <img src="assets/images/icone-rotina.png" alt="" aria-hidden="true" class="svc-tile__icon">
+          <h3 class="svc-tile__name">Consumidor</h3>
+          <p class="svc-tile__lawyer">por Dra. Aline e Dra. Heloísa</p>
+          <p class="svc-tile__desc">Cobranças e negativações indevidas, cláusulas abusivas, planos de saúde, bancos e indenizações por danos.</p>
+          <ul class="svc-tile__chips"><li>Cobrança indevida</li><li>Negativação</li><li>Planos de saúde</li><li>Indenizações</li></ul>
+          <span class="svc-tile__link">Ver sub-áreas <span class="ico" aria-hidden="true">&rarr;</span></span>
         </a>
       </div>
     </div>
@@ -260,7 +306,7 @@
 
       <div class="container-ledger reveal" style="margin-bottom:80px;">
         <p style="font-family:'Cormorant Garamond',serif; font-size:22px; line-height:1.6; color:#FFF; text-align:center;">
-          A HAAS Advocacia nasceu do compromisso de duas advogadas com a precisão técnica e o respeito a quem busca a justiça. Atendemos famílias, trabalhadores, segurados e empresas com a ética e a tradição que cada causa merece.
+          As sócias reúnem ampla experiência no contencioso judicial e administrativo, conduzindo demandas envolvendo acidentes de trabalho, doenças ocupacionais, estabilidade acidentária, verbas rescisórias, horas extras, reconhecimento de vínculo empregatício, aposentadorias, benefícios por incapacidade, revisões previdenciárias, pensão por morte e benefícios assistenciais perante o INSS.
         </p>
         <blockquote class="quote-gold" style="margin-top:48px;">
           Excelência não é luxo — é o mínimo que a sua causa merece.
@@ -275,34 +321,34 @@
       <div class="profile-grid">
         <article class="profile reveal">
           <div class="profile__frame">
-            <div class="profile__placeholder" aria-hidden="true">Dra. Aline</div>
+            <img class="profile__icon" src="assets/images/icone-cliente-1.png" alt="" aria-hidden="true">
             <img class="profile__moldura" src="assets/images/moldura.png" alt="" aria-hidden="true">
             <!-- TODO: substituir placeholder por foto real:
                  <img class="profile__photo" src="assets/images/dra-aline.jpg" alt="Dra. Aline, advogada previdenciarista">
             -->
           </div>
-          <h4 class="profile__name">Dra. Aline</h4>
+          <h4 class="profile__name">Dra. Aline Britto de Albuquerque</h4>
           <p class="profile__oab">OAB/SP — a confirmar</p>
-          <p class="profile__specialty">Direito Previdenciário</p>
+          <p class="profile__specialty">Direito Previdenciário · Família e Consumidor</p>
           <p class="profile__bio">
-            Atuação dedicada a benefícios do INSS, aposentadorias, revisões, planejamento previdenciário e defesa administrativa e judicial.
+            Advogada com 20 anos de experiência em Direito Previdenciário, dedicada à defesa dos segurados nas esferas administrativa e judicial — concessão e revisão de benefícios, aposentadorias, auxílio-doença, aposentadoria por invalidez, pensão por morte e benefícios assistenciais. Atua também em Família e Direito do Consumidor, em conjunto com a Dra. Heloísa.
           </p>
           <a href="servicos/previdenciario.html" class="profile__link">Ver currículo completo →</a>
         </article>
 
         <article class="profile reveal">
           <div class="profile__frame">
-            <div class="profile__placeholder" aria-hidden="true">Dra. Heloísa</div>
+            <img class="profile__icon" src="assets/images/icone-cliente-2.png" alt="" aria-hidden="true">
             <img class="profile__moldura" src="assets/images/moldura.png" alt="" aria-hidden="true">
             <!-- TODO: substituir placeholder por foto real:
                  <img class="profile__photo" src="assets/images/dra-heloisa.jpg" alt="Dra. Heloísa, advogada trabalhista">
             -->
           </div>
-          <h4 class="profile__name">Dra. Heloísa</h4>
+          <h4 class="profile__name">Dra. Heloísa G. Pacheco Moretti</h4>
           <p class="profile__oab">OAB/SP — a confirmar</p>
-          <p class="profile__specialty">Direito Trabalhista</p>
+          <p class="profile__specialty">Direito Trabalhista · Família e Consumidor</p>
           <p class="profile__bio">
-            Reclamações trabalhistas, defesa de empresas, consultoria preventiva e cálculos de rescisão com atenção a cada detalhe do contrato.
+            Advogada com mais de 15 anos na área Trabalhista, dedicada à defesa dos trabalhadores no contencioso judicial e consultivo — acidentes de trabalho, doenças ocupacionais, assédio moral, horas extras, verbas rescisórias e reconhecimento de vínculo empregatício. Atua também em Família e Direito do Consumidor, em conjunto com a Dra. Aline.
           </p>
           <a href="servicos/trabalhista.html" class="profile__link">Ver currículo completo →</a>
         </article>
@@ -317,7 +363,7 @@
   <!-- =====================================================================
        LOCALIZAÇÃO
        ===================================================================== -->
-  <section class="section bg-section-emphasis has-noise" id="contato" aria-label="Contato e Localização" data-scroll-offset="90">
+  <section class="section bg-section-default has-noise section--gold-rule-top" id="contato" aria-label="Contato e Localização" data-scroll-offset="90">
     <div class="container-page">
       <header class="section-head reveal">
         <p class="section-head__eyebrow">Onde Estamos</p>
@@ -332,10 +378,7 @@
           <dl>
             <div>
               <dt>Endereço</dt>
-              <dd>
-                <!-- TODO: confirmar endereço completo com o cliente. Maps original em DADOS.txt: https://goo.gl/maps/6VGpLhBoyb5ytDkQ9 -->
-                Endereço a confirmar — consulte pelo WhatsApp.
-              </dd>
+              <dd>R. Catequese, 1153 — Sala 73<br>Vila Guiomar, Santo André — SP<br>CEP 09090-401</dd>
             </div>
             <div>
               <dt>Telefone</dt>
@@ -351,11 +394,11 @@
             </div>
             <div>
               <dt>Horário</dt>
-              <dd>Segunda a sexta · 9h às 18h</dd>
+              <dd>Segunda a sábado · 9h às 18h</dd>
             </div>
           </dl>
           <div style="margin-top:48px;">
-            <a href="https://www.google.com/maps/dir/?api=1&destination=https%3A%2F%2Fgoo.gl%2Fmaps%2F6VGpLhBoyb5ytDkQ9"
+            <a href="https://www.google.com/maps/dir/?api=1&destination=R.+Catequese%2C+1153%2C+Vila+Guiomar%2C+Santo+Andr%C3%A9%2C+SP%2C+09090-401"
                class="btn btn--gold-solid btn--small"
                target="_blank" rel="noopener">
               Ver Rotas →
@@ -363,13 +406,15 @@
           </div>
         </div>
 
-        <iframe class="location-map"
-                src="https://www.google.com/maps?q=HAAS+Advocacia&output=embed"
-                loading="lazy"
-                title="Mapa do escritório HAAS Advocacia"
-                referrerpolicy="no-referrer-when-downgrade"
-                allowfullscreen></iframe>
-        <!-- TODO: substituir URL do iframe pelo endereço real do escritório (lat,lng ou query precisa). -->
+        <div class="map-frame-wrapper">
+          <iframe class="location-map"
+                  src="https://www.google.com/maps?q=R.+Catequese%2C+1153%2C+Vila+Guiomar%2C+Santo+André%2C+SP%2C+09090-401&output=embed"
+                  loading="lazy"
+                  title="Mapa do escritório HAAS Advocacia"
+                  referrerpolicy="no-referrer-when-downgrade"
+                  allowfullscreen></iframe>
+          <img class="map-frame-img" src="assets/images/moldura.png" alt="" aria-hidden="true">
+        </div>
       </div>
     </div>
   </section>
@@ -466,7 +511,7 @@
             <li><a href="tel:+551149015616">Tel: (11) 4901-5616</a></li>
             <li><a href="https://wa.me/5511984337675" target="_blank" rel="noopener">WhatsApp: (11) 98433-7675</a></li>
             <li><a href="mailto:haas.adv@outlook.com">haas.adv@outlook.com</a></li>
-            <li style="color:#8A8A8A;">Seg–Sex · 9h às 18h</li>
+            <li style="color:#8A8A8A;">Seg–Sáb · 9h às 18h</li>
           </ul>
         </div>
 
@@ -531,5 +576,20 @@
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
   <script src="assets/js/main.js"></script>
   <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
+  <script>
+    /* Bento "Áreas de Atuação" (home): entrada em stagger. O glow é fixo via CSS (--mx/--my). */
+    (() => {
+      const tiles = document.querySelectorAll('.svc-bento .svc-tile');
+      if (!tiles.length) return;
+      if ('IntersectionObserver' in window) {
+        const io = new IntersectionObserver((entries) => {
+          entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('is-in'); io.unobserve(e.target); } });
+        }, { rootMargin: '0px 0px -10% 0px' });
+        tiles.forEach((t) => io.observe(t));
+      } else {
+        tiles.forEach((t) => t.classList.add('is-in'));
+      }
+    })();
+  </script>
 </body>
 </html>

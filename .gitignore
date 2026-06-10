@@ -34,3 +34,15 @@ npm-debug.log*
 .env
 .env.*
 !.env.example
+
+# Arquivos de trabalho internos (não vão pro site)
+FEEDBACKS.TXT
+HOSTINGER.md
+
+# Assets originais do cliente com nomes impróprios para web (cópias web-friendly em assets/images/)
+BACKGROUND OFICIAL NOVO.png
+VIDEO INTRO.mp4
+assets/images/ICON CLIENTE (1).png
+assets/images/ICON CLIENTE (2).png
+assets/images/background sem logo.png
+assets/images/hero-poster.jpg

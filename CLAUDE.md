@@ -12,7 +12,7 @@
 - **Profissionais:**
   - **Dra. Aline** — Direito **Previdenciário**.
   - **Dra. Heloísa** — Direito **Trabalhista**.
-  - Ambas atuam em **Civil e Família**.
+  - Ambas atuam em **Família e Direito do Consumidor**.
 - **Tom de marca:** institucional, autoridade, tradição, sóbrio. PT-BR formal mas próximo. Nunca jocoso, nunca casual demais.
 - **Referência cultural:** [BNMA Advogados](https://bnmaadvogados.com.br/) — dark cinematográfico premium.
 - **Identidade visual completa:** [`DESIGN.md`](DESIGN.md) — paleta black / gold / white, Cinzel + Cormorant Garamond + Inter, vibe dark premium cinematográfico. **Esta é a fonte única de verdade visual** — qualquer decisão de cor, fonte, espaçamento, motion ou componente vem de lá.
@@ -62,10 +62,11 @@ Estrutura confirmada para a HAAS (brief em [`infos.txt`](infos.txt)):
 2. **Sobre Nós em 2 blocos** — obrigatório:
    - (a) HAAS Advocacia — texto institucional do escritório.
    - (b) Profissionais — perfis de Dra. Aline e Dra. Heloísa lado a lado, com foto em moldura gold, OAB, especialidade, bio resumida, CTA "Ver currículo completo".
-3. **Serviços / Áreas de Atuação** — cards das 3 áreas:
-   - **Previdenciário** (Dra. Aline) → link para `servicos/previdenciario.html`
+3. **Serviços / Áreas de Atuação** — cards das 4 áreas:
    - **Trabalhista** (Dra. Heloísa) → link para `servicos/trabalhista.html`
-   - **Civil e Família** (ambas) → link para `servicos/civil-familia.html`
+   - **Previdenciário** (Dra. Aline) → link para `servicos/previdenciario.html`
+   - **Família** (ambas) → link para `servicos/familia.html`
+   - **Direito do Consumidor** (ambas) → link para `servicos/consumidor.html`
 4. **Páginas de Autoridade** — uma por área, template repetível com bio + currículo + lista de sub-áreas (sub-áreas listadas em §4 deste arquivo). Currículos: Aline e Heloísa vão enviar.
 5. **Blog** — 3–6 cards de posts iniciais em `blog/index.html`, cada post é um HTML estático em `blog/*.html` no padrão ledger (`max-width: 720px`).
 6. **FAQ** — accordion `<details>` nativo, 3–5 perguntas.
@@ -116,9 +117,13 @@ Fonte: [`infos.txt`](infos.txt). Esta lista alimenta as páginas de autoridade �
 - Terceirização e Reformas Trabalhistas
 - Advocacia Preventiva para Empresas
 
-### Civil e Família — ambas as advogadas
+### Família — ambas as advogadas
 
-Sem subdivisão obrigatória conforme brief. Texto editorial Cormorant explicando o atendimento conjunto e os tipos de demanda (divórcio, inventário, guarda, contratos civis, dano moral, etc.) a confirmar com as advogadas.
+Direito de Família em atendimento conjunto: divórcio (consensual/litigioso), partilha de bens, inventário e sucessões, guarda e convivência, alimentos e pensão, união estável, mediação familiar, investigação/reconhecimento de paternidade.
+
+### Direito do Consumidor — ambas as advogadas
+
+Atendimento conjunto: vícios/defeitos de produtos e serviços, cobrança e negativação indevida, superendividamento, cláusulas abusivas, planos de saúde (negativas de cobertura), bancos e financeiras, telefonia/internet/TV, compras online, indenização por danos morais e materiais. (Civil deixou de ser área nomeada — saiu da lista pública a pedido do cliente.)
 
 ---
 
@@ -298,7 +303,7 @@ Regras de ouro deste projeto (lei interna — não desvie):
 - **Gold é destaque, nunca dominante.** Black domina; white é texto/conteúdo; gold pontua.
 - **Cinematic Intro Sequence é não-negociável** no primeiro carregamento — com fallback `prefers-reduced-motion`.
 - **Sobre Nós SEMPRE em 2 blocos**: institucional + perfis das advogadas. Não comprimir em um só.
-- **Cards de área de atuação SEMPRE linkam** para uma página de autoridade do especialista (Aline → Previdenciário, Heloísa → Trabalhista, ambas → Civil e Família).
+- **Cards de área de atuação SEMPRE linkam** para uma página de autoridade do especialista (Aline → Previdenciário, Heloísa → Trabalhista, ambas → Família e Consumidor).
 - **WhatsApp continua o canal primário** — não substituir por formulário.
 - **Reaproveitar os ícones gold do Instagram** ([`017 ÍCONES DESTAQUES INSTAGRAM/`](017%20%C3%8DCONES%20DESTAQUES%20INSTAGRAM/)) como ícones das áreas/seções para coerência cross-channel.
 - **Logo em destaque maior** que template genérico — pedido explícito do cliente.
@@ -337,7 +342,8 @@ HAAS advocacia/
 ├── servicos/
 │   ├── previdenciario.html
 │   ├── trabalhista.html
-│   └── civil-familia.html
+│   ├── familia.html
+│   └── consumidor.html
 ├── blog/
 │   ├── index.html
 │   └── <posts>.html

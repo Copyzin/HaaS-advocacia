@@ -31,6 +31,11 @@
   background-color: var(--bg-section-default);
 }
 
+/* Divisor gold — mesma espessura das linhas da moldura HAAS (1px sólido) */
+.section--gold-rule-top {
+  border-top: 1px solid #C9A961;
+}
+
 /* -------------------------------------------------------------------------
    Film grain global
    ------------------------------------------------------------------------- */
@@ -69,6 +74,13 @@ body::before {
 
 html {
   scroll-behavior: smooth;
+  /* Reserva o gutter da scrollbar SEMPRE — durante a intro o body fica
+     `overflow: hidden` (scroll travado) e a scrollbar some; ao destravar no
+     fim da intro ela reapareceria e a largura do layout mudaria ~15px,
+     deslocando o background do hero horizontalmente bem no momento do fade
+     do logo. Com `stable`, a largura é constante nos dois estados — o fundo
+     fica pixel-perfect, imune ao aparecer/sumir da scrollbar. */
+  scrollbar-gutter: stable;
   /* Fallback para anchor scroll iniciado pelo browser (URL direta com #,
      back/forward, foco por Tab). O JS atualiza --site-header-h a partir
      do bbox real do .site-header, então o offset acompanha mudanças de
@@ -90,6 +102,10 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
+  /* Clips any element that bleeds past the viewport edge on narrow screens.
+     `clip` (unlike `hidden`) doesn't create a BFC, so position:fixed children
+     (header, intro-stage, FAB, nav-drawer) are unaffected. */
+  overflow-x: clip;
 }
 
 img {
@@ -251,11 +267,11 @@ a {
   }
 }
 
-/* Skip button — desktop (ghost gold com border) */
+/* Skip button — desktop */
 .intro-skip {
   position: fixed;
-  bottom: 32px;
-  right: 32px;
+  bottom: 60px;
+  right: 60px;
   z-index: 110;
   font-family: 'Cinzel', serif;
   font-size: 12px;
@@ -263,18 +279,18 @@ a {
   letter-spacing: 0.2em;
   text-transform: uppercase;
   color: #C9A961;
-  background: transparent;
+  background: rgba(0, 0, 0, 0.4);
   border: 1px solid #C9A961;
   border-radius: 999px;
   padding: 12px 20px;
   cursor: pointer;
-  opacity: 0.6;
-  transition: opacity 200ms cubic-bezier(0.33, 1, 0.68, 1);
+  opacity: 1;
+  transition: background 200ms cubic-bezier(0.33, 1, 0.68, 1);
 }
 
 .intro-skip:hover,
 .intro-skip:focus-visible {
-  opacity: 1;
+  background: rgba(201, 169, 97, 0.15);
   outline: none;
 }
 
@@ -282,94 +298,28 @@ a {
   box-shadow: 0 0 0 2px #E5C77A;
 }
 
-/* Skip button — mobile (minimalista, sem border, hit-area ≥44×44 WCAG 2.5.5) */
+/* Skip button — mobile (chip centralizado, hit-area ≥44×44 WCAG 2.5.5) */
 @media (max-width: 1023px) {
   .intro-skip {
-    bottom: 20px;
-    right: 20px;
-    border: 0;
-    background: transparent;
-    padding: 14px 16px;
+    bottom: 32px;
+    right: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    border: 1px solid #C9A961;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 12px 20px;
     min-height: 44px;
     min-width: 44px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    font-size: 11px;
-    opacity: 0.7;
-    border-radius: 0;
+    font-size: 12px;
+    opacity: 1;
+    border-radius: 999px;
   }
 
   .intro-skip:active {
-    opacity: 1;
-  }
-}
-
-/* Audio toggle — top-right corner (padrão de brand films premium: separa
-   controle de mídia do skip que fica em bottom-right).
-   Estado default: muted (autoplay garantido). Click libera o áudio. */
-.intro-audio {
-  position: fixed;
-  top: 32px;
-  right: 32px;
-  z-index: 110;
-  width: 44px;
-  height: 44px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 10px;
-  border: 1px solid #C9A961;
-  border-radius: 999px;
-  background: transparent;
-  color: #C9A961;
-  opacity: 0.6;
-  cursor: pointer;
-  transition: opacity 200ms cubic-bezier(0.33, 1, 0.68, 1),
-              box-shadow 200ms ease;
-}
-
-.intro-audio:hover,
-.intro-audio:focus-visible {
-  opacity: 1;
-  outline: none;
-}
-
-.intro-audio:focus-visible {
-  box-shadow: 0 0 0 2px #E5C77A;
-}
-
-.intro-audio__icon {
-  position: absolute;
-  width: 20px;
-  height: 20px;
-  fill: currentColor;
-  transition: opacity 180ms ease;
-}
-
-/* Default state: muted (mostra ícone --off, esconde --on) */
-.intro-audio .intro-audio__icon--off { opacity: 1; }
-.intro-audio .intro-audio__icon--on  { opacity: 0; }
-
-/* Após ativar som (.is-on no botão): inverte */
-.intro-audio.is-on .intro-audio__icon--off { opacity: 0; }
-.intro-audio.is-on .intro-audio__icon--on  { opacity: 1; }
-
-/* Audio toggle — mobile (minimalista, sem border, respeita safe-area do notch/Dynamic Island) */
-@media (max-width: 1023px) {
-  .intro-audio {
-    top: calc(20px + env(safe-area-inset-top, 0px));
-    right: 20px;
-    border: 0;
-    background: transparent;
-    padding: 10px;
-    min-height: 44px;
-    min-width: 44px;
-    opacity: 0.7;
-  }
-
-  .intro-audio:active {
-    opacity: 1;
+    background: rgba(201, 169, 97, 0.15);
   }
 }
 
@@ -381,13 +331,12 @@ a {
   align-items: center;
   justify-content: center;
   pointer-events: none;
-  font-family: 'Cinzel', serif;
-  font-size: 60px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-  color: #E5C77A;
   opacity: 0.4;
   animation: intro-loader-pulse 1.6s ease-in-out infinite;
+}
+.intro-loader img {
+  width: clamp(140px, 22vw, 240px);
+  height: auto;
 }
 
 @keyframes intro-loader-pulse {
@@ -445,8 +394,6 @@ body.is-intro-locked {
 }
 
 .site-header__inner {
-  max-width: 1280px;
-  margin-inline: auto;
   padding: 16px 24px;
   display: flex;
   align-items: center;
@@ -456,7 +403,7 @@ body.is-intro-locked {
 
 @media (min-width: 1024px) {
   .site-header__inner {
-    padding: 20px 48px;
+    padding: 20px 50px;
   }
 }
 
@@ -600,11 +547,9 @@ body.is-intro-locked {
      (clareia áreas escuras sem deslavar a cor, igual ao body::before global). */
   background-blend-mode: normal, screen;
   z-index: 95;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 32px;
+  /* Sem flex-center: o conteúdo é posicionado dentro da janela transparente
+     da moldura via .nav-drawer__inner (absolute), respeitando as aspas e o
+     entalhe da logo no canto inferior direito. */
   transform: translateX(100%);
   transition: transform 400ms cubic-bezier(0.33, 1, 0.68, 1);
 }
@@ -650,25 +595,136 @@ body.is-intro-locked {
   z-index: 1;
 }
 
-.nav-drawer a {
+/* -------------------------------------------------------------------------
+   Drawer — Índice Editorial
+   O conteúdo vive DENTRO da janela transparente da moldura. As porcentagens
+   acompanham o frame: como o ::before usa background-size:100% 100%, a janela
+   ocupa sempre a mesma fração da viewport, independente do aspect ratio do
+   device — então posicionar o inner em % casa com o PNG em qualquer celular.
+   O lado direito recua mais que o esquerdo: conteúdo esquerda-alinhado nunca
+   cruza a logo HAAS cravada no canto inferior direito do frame.
+   ------------------------------------------------------------------------- */
+.nav-drawer__inner {
+  position: absolute;
+  left: 15%;
+  right: 13.5%;
+  top: 11%;
+  bottom: 8.5%;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-drawer__eyebrow {
   font-family: 'Cinzel', serif;
-  font-size: 24px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.34em;
+  text-transform: uppercase;
+  color: #C9A961;
+  margin: 0 0 26px;
+}
+
+.nav-drawer__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+/* Fios gold finos entre os itens — mesma linguagem dos separadores do bloco
+   de Contato (.location-info dl) e do FAQ. Coerência cross-seção. */
+.nav-drawer__list li {
+  border-top: 1px solid rgba(201, 169, 97, 0.22);
+}
+.nav-drawer__list li:last-child {
+  border-bottom: 1px solid rgba(201, 169, 97, 0.22);
+}
+
+.nav-drawer__list a {
+  position: relative;
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  padding: 17px 4px;
+  text-decoration: none;
+}
+
+/* Seta editorial: ancorada à direita, desliza no hover/foco/toque. */
+.nav-drawer__list a::after {
+  content: '→';
+  margin-left: auto;
+  align-self: center;
+  font-family: 'Cinzel', serif;
+  font-size: 16px;
+  color: #C9A961;
+  opacity: 0;
+  transform: translateX(-8px);
+  transition: opacity 240ms cubic-bezier(0.33, 1, 0.68, 1),
+              transform 240ms cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+/* Numeral em Cormorant italic gold — o acento editorial do DESIGN.md
+   ("Cormorant italic para citações e mottos") aplicado ao índice. */
+.nav-drawer__num {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 16px;
+  font-weight: 500;
+  color: #C9A961;
+  min-width: 22px;
+  transition: color 220ms ease;
+}
+
+.nav-drawer__label {
+  font-family: 'Cinzel', serif;
+  font-size: 21px;
   font-weight: 700;
-  letter-spacing: 0.1em;
+  letter-spacing: 0.13em;
   text-transform: uppercase;
   color: #F2F2F2;
+  transition: color 220ms ease;
 }
 
-.nav-drawer a:hover {
-  color: #C9A961;
+.nav-drawer__list a:hover .nav-drawer__label,
+.nav-drawer__list a:focus-visible .nav-drawer__label,
+.nav-drawer__list a:active .nav-drawer__label,
+.nav-drawer__list a:hover .nav-drawer__num,
+.nav-drawer__list a:focus-visible .nav-drawer__num,
+.nav-drawer__list a:active .nav-drawer__num {
+  color: #E5C77A;
 }
 
-/* Entrada escalonada dos itens do drawer.
-   Estado inicial: invisível e empurrado para baixo. Quando .is-open dispara,
-   cada item respeita seu transition-delay para fazer fade-up um a um.
-   O primeiro filho é o botão de fechar; os <a> começam em nth-child(2). */
+.nav-drawer__list a:hover::after,
+.nav-drawer__list a:focus-visible::after,
+.nav-drawer__list a:active::after {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* Rodapé: empurrado para a base da janela. WhatsApp + motto à esquerda,
+   deixando o canto inferior direito livre para a logo da moldura. O motto
+   em Cormorant italic "fecha" o conteúdo junto às aspas (❞) do frame. */
+.nav-drawer__foot {
+  margin-top: auto;
+  padding-top: 28px;
+}
+
+.nav-drawer__motto {
+  font-family: 'Cormorant Garamond', serif;
+  font-style: italic;
+  font-size: 17px;
+  font-weight: 500;
+  letter-spacing: 0.01em;
+  color: rgba(245, 241, 232, 0.5);
+  margin: 16px 0 0;
+}
+
+/* Entrada escalonada — fade-up item a item ao abrir.
+   Ordem: close → eyebrow → 5 linhas numeradas → rodapé. */
 .nav-drawer__close,
-.nav-drawer > a {
+.nav-drawer__eyebrow,
+.nav-drawer__list li,
+.nav-drawer__foot {
   opacity: 0;
   transform: translateY(20px);
   transition: opacity 400ms cubic-bezier(0.33, 1, 0.68, 1),
@@ -676,18 +732,21 @@ body.is-intro-locked {
 }
 
 .nav-drawer.is-open .nav-drawer__close,
-.nav-drawer.is-open > a {
+.nav-drawer.is-open .nav-drawer__eyebrow,
+.nav-drawer.is-open .nav-drawer__list li,
+.nav-drawer.is-open .nav-drawer__foot {
   opacity: 1;
   transform: translateY(0);
 }
 
-.nav-drawer.is-open .nav-drawer__close { transition-delay: 220ms; }
-.nav-drawer.is-open > a:nth-child(2)   { transition-delay: 280ms; }
-.nav-drawer.is-open > a:nth-child(3)   { transition-delay: 340ms; }
-.nav-drawer.is-open > a:nth-child(4)   { transition-delay: 400ms; }
-.nav-drawer.is-open > a:nth-child(5)   { transition-delay: 460ms; }
-.nav-drawer.is-open > a:nth-child(6)   { transition-delay: 520ms; }
-.nav-drawer.is-open > a:nth-child(7)   { transition-delay: 580ms; }
+.nav-drawer.is-open .nav-drawer__close                { transition-delay: 200ms; }
+.nav-drawer.is-open .nav-drawer__eyebrow              { transition-delay: 260ms; }
+.nav-drawer.is-open .nav-drawer__list li:nth-child(1) { transition-delay: 320ms; }
+.nav-drawer.is-open .nav-drawer__list li:nth-child(2) { transition-delay: 370ms; }
+.nav-drawer.is-open .nav-drawer__list li:nth-child(3) { transition-delay: 420ms; }
+.nav-drawer.is-open .nav-drawer__list li:nth-child(4) { transition-delay: 470ms; }
+.nav-drawer.is-open .nav-drawer__list li:nth-child(5) { transition-delay: 520ms; }
+.nav-drawer.is-open .nav-drawer__foot                 { transition-delay: 580ms; }
 
 /* Close button — circle gold-rim glass, mesma linguagem visual do .nav-toggle
    (hamburger) pra criar um par coerente: hamburger no header / close no drawer.
@@ -755,9 +814,9 @@ body.is-intro-locked {
   justify-content: center;
   gap: 12px;
   font-family: 'Cinzel', serif;
-  font-size: 14px;
-  font-weight: 800;
-  letter-spacing: 0.02em;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   /* !important neutraliza a regra .nav-drawer a (Cinzel 24px branco) e o
      hover-gold .nav-drawer a:hover — senão o texto ficaria branco/gold em vez
@@ -766,7 +825,8 @@ body.is-intro-locked {
   background: #C9A961;
   padding: 12px 24px 12px 18px;
   border-radius: 999px;
-  margin-top: 24px;
+  /* Alinhado à esquerda no rodapé do índice (inline-flex → largura do conteúdo). */
+  align-self: flex-start;
   /* Outline composto:
        1) Border 1px gold-light (rim de luz na transição com o frame da moldura).
        2) Inset shadow no topo (highlight) e fundo (ground line) — dá curvatura.
@@ -779,8 +839,9 @@ body.is-intro-locked {
     0 0 0 1px rgba(167, 138, 75, 0.5),
     0 6px 18px rgba(0, 0, 0, 0.4),
     0 0 28px rgba(201, 169, 97, 0.18);
-  /* Largura máxima — pill nunca encosta nos fios gold laterais da moldura. */
-  max-width: min(260px, calc(100% - 120px));
+  /* Inner já está inset dentro da janela, então o pill se dimensiona pelo
+     conteúdo sem precisar de constraint contra os fios laterais da moldura. */
+  max-width: 100%;
   box-sizing: border-box;
   /* Inclui opacity/transform pra entrar coreografado pelo stagger do drawer
      sem competir. Hover usa background/border-color + box-shadow (sem transform),
@@ -829,53 +890,42 @@ body.is-intro-locked {
   position: relative;
   min-height: 100vh;
   display: flex;
-  /* Ancoragem inferior: libera o miolo do hero para a logo central do vídeo
-     de background respirar sem competir com o headline. */
-  align-items: flex-end;
+  align-items: center;
+  /* padding-top empurra o ponto de equilíbrio do flex para a área visível
+     abaixo do header fixo — centralizando o conteúdo no espaço real da tela */
+  padding-top: var(--site-header-h, 80px);
   overflow: hidden;
   background: #000000;
 }
 
-/* Vídeo congelado como background do hero — espelha lógica do intro */
 .hero__bg {
   position: absolute;
   inset: 0;
   background: #000000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   z-index: 0;
 }
 
-.hero__bg video,
-.hero__bg img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+/* Camada única de fundo do hero. É exatamente o último frame do vídeo de
+   intro (background-oficial.png, 1920×1080) — o vídeo dissolve para revelar
+   este fundo estático, então o handoff é imperceptível. */
+.hero__bg-final {
+  position: absolute;
+  inset: 0;
+  background-image: url('../images/background-oficial.png');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
   filter: brightness(0.55);
 }
 
 @media (max-width: 1023px) {
-  /* Mobile: full-bleed estilo YouTube Shorts (mesma lógica do intro).
-     O freeze-frame do vídeo preenche todo o hero verticalmente, mantendo
-     a logo central no centro do viewport. */
-  .hero__bg video,
-  .hero__bg img {
-    width: 100vw;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-    /* Estado inicial: nítido. O blur entra ACOPLADO ao reveal do hero (.is-revealed),
-       definido por main.js no mesmo tick em que o conteúdo faz fade-up. Curva longa
-       (1200ms) faz o efeito "tela respira e foca no texto" — nunca pop-in.
-       brightness 0.55 → 0.45 reforça a profundidade durante o blur. */
+  .hero__bg-final {
     filter: brightness(0.55) blur(0px);
     transition: filter 1200ms cubic-bezier(0.33, 1, 0.68, 1);
     will-change: filter;
   }
 
-  .hero.is-revealed .hero__bg video,
-  .hero.is-revealed .hero__bg img {
+  .hero.is-revealed .hero__bg-final {
     filter: brightness(0.45) blur(12px);
   }
 }
@@ -883,12 +933,9 @@ body.is-intro-locked {
 .hero__content {
   position: relative;
   z-index: 1;
-  max-width: 1280px;
+  max-width: none;          /* edge-to-edge: o headline usa toda a largura disponível */
   margin-inline: auto;
-  /* Padding inferior generoso ancora o conteúdo no rodapé do hero,
-     preservando a logo central do vídeo como protagonista visual.
-     O top continua existindo apenas como cushion para o header. */
-  padding: 80px 24px 96px;
+  padding: 40px 24px;  /* espaço respiratório — posicionamento vertical é do flex pai */
   width: 100%;
   /* Estado inicial: invisível (entra após intro) */
   opacity: 0;
@@ -897,7 +944,7 @@ body.is-intro-locked {
 
 @media (min-width: 1024px) {
   .hero__content {
-    padding: 96px 48px 120px;
+    padding: 48px 50px;  /* espaço respiratório desktop */
   }
 }
 
@@ -915,52 +962,100 @@ body.is-intro-locked {
   letter-spacing: 0.25em;
   text-transform: uppercase;
   color: #C9A961;
-  margin: 0 0 32px;
+  margin: 0 0 20px;
 }
 
+/* Headline em dois níveis numa única <h1> (preserva SEO da frase completa):
+   tier 1 = a promessa (marfim, grande, tracking generoso = o golpe de impacto);
+   tier 2 = as áreas (menor, conectivos discretos, as 4 áreas no gold). */
 .hero__headline {
   font-family: 'Cinzel', serif;
   font-weight: 700;
-  /* Escala reduzida e coluna estreita: o headline vive como uma coluna
-     vertical à esquerda do hero, sem cruzar o eixo central horizontal
-     onde a logo do vídeo de background está fixada. Largura calibrada
-     em 11ch para garantir que nenhuma linha encoste no monograma HAAS. */
-  font-size: clamp(32px, 4.4vw, 60px);
-  /* line-height 1.32: cobre o desenho completo dos acentos altos da Cinzel
-     uppercase (Ê em "EXCELÊNCIA", Í em "JURÍDICA", Ó em "HISTÓRIA").
-     Valores menores deixavam o topo do diacrítico fora da box renderizada. */
-  line-height: 1.32;
-  letter-spacing: 0.02em;
   text-transform: uppercase;
-  margin: 0 0 28px;
-  max-width: 11ch;
+  margin: 0 0 24px;
+  color: #F5F1E8;
+}
+
+.hero__headline-lead,
+.hero__headline-areas {
+  display: block;
+  text-wrap: balance;          /* equilibra as linhas; fallback = quebra natural */
+}
+
+/* Tier 1 — promessa: enche a largura, tracking aberto */
+.hero__headline-lead {
+  font-size: clamp(38px, 5.8vw, 92px);
+  line-height: 1.08;
+  letter-spacing: 0.16em;
+}
+
+/* Tier 2 — áreas: conectivos em marfim suave; as áreas recebem o gold */
+.hero__headline-areas {
+  font-size: clamp(16px, 2.6vw, 40px);
+  line-height: 1.2;
+  letter-spacing: 0.10em;
+  color: rgba(245, 241, 232, 0.6);
+  margin-top: 0.5em;
+}
+
+/* Palavras das áreas no gradiente gold metálico da marca (clip em texto) */
+.hero__area {
+  background: linear-gradient(135deg, #E5C77A 0%, #C9A961 35%, #8C6E2B 60%, #C9A961 80%, #E5C77A 100%);
+  -webkit-background-clip: text;
+          background-clip: text;
+  -webkit-text-fill-color: transparent;
+          color: transparent;
 }
 
 .hero__subtitle {
-  font-family: 'Cormorant Garamond', serif;
-  font-style: italic;
-  /* Coluna mais estreita para acompanhar o headline ancorado à esquerda —
-     evita que o subtítulo invada o terço central onde a logo do vídeo vive. */
-  font-size: clamp(17px, 1.9vw, 21px);
-  line-height: 1.4;
-  color: #FFFFFF;
-  margin: 0 0 40px;
-  max-width: 42ch;
+  font-family: 'Cinzel', serif;
+  font-weight: 600;
+  text-transform: uppercase;
+  /* Sub-legenda do headline-areas: mesmo DNA (Cinzel, tracking), mas claramente
+     subordinada — menor, mais atenuada, linha generosa pra legibilidade uppercase. */
+  font-size: clamp(10px, 0.9vw, 12px);
+  line-height: 1.75;
+  letter-spacing: 0.12em;
+  color: rgba(245, 241, 232, 0.45);
+  margin: 0 0 28px;
 }
 
 .hero__ctas {
   display: flex;
   flex-wrap: wrap;
-  gap: 16px;
+  gap: 24px;
   align-items: center;
 }
 
+.hero__ctas .btn {
+  font-size: 15px;
+}
+
 @media (max-width: 1023px) {
+  /* 100svh exclui a barra do browser em dispositivos reais (Chrome Android),
+     garantindo que o conteúdo caiba na área visível no carregamento inicial.
+     Fallback: min-height: 100vh do rule base ainda vale para browsers sem svh. */
+  .hero {
+    min-height: 100svh;
+  }
+
+  /* Reduz espaçamento vertical para que headline + subtitle colapsada +
+     ambos os CTAs caibam acima da dobra em telas pequenas (≤740px). */
+  .hero__content {
+    padding-top: 24px;
+    padding-bottom: 24px;
+  }
+
+  .hero__headline {
+    margin-bottom: 16px;
+  }
+
   /* No mobile, decisão de design: botões centralizados horizontalmente,
      enquanto eyebrow/headline/subtitle permanecem ancorados à esquerda
      (coluna institucional preservada — fonte: plano aprovado). */
   .hero__ctas {
     justify-content: center;
+    gap: 16px;
   }
 
   /* Pills empilham e respiram dentro da coluna. max-width preserva o pill
@@ -969,6 +1064,76 @@ body.is-intro-locked {
     width: 100%;
     max-width: 320px;
     justify-content: center;
+  }
+}
+
+/* -------------------------------------------------------------------------
+   Hero — subtitle expand/collapse (mobile only)
+   ------------------------------------------------------------------------- */
+
+/* Desktop: wrapper is transparent, button hidden — layout unchanged */
+.hero__subtitle-wrap {
+  margin-bottom: 28px; /* replaces the subtitle's own margin-bottom on all sizes */
+}
+
+.hero__subtitle {
+  margin-bottom: 0; /* spacing now owned by .hero__subtitle-wrap */
+}
+
+.hero__subtitle-toggle {
+  display: none;
+}
+
+@media (max-width: 1023px) {
+  /* Collapsed state: show ~3 lines, fade bottom edge */
+  .hero__subtitle {
+    max-height: 70px;
+    overflow: hidden;
+    -webkit-mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+            mask-image: linear-gradient(to bottom, black 50%, transparent 100%);
+    transition: max-height 500ms cubic-bezier(0.33, 1, 0.68, 1),
+                -webkit-mask-image 300ms ease,
+                mask-image 300ms ease;
+  }
+
+  .hero__subtitle.is-expanded {
+    max-height: 600px;
+    -webkit-mask-image: none;
+            mask-image: none;
+  }
+
+  .hero__subtitle-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 6px;
+    background: none;
+    border: none;
+    padding: 6px 0;
+    cursor: pointer;
+    font-family: 'Cinzel', serif;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: #C9A961;
+    transition: color 200ms ease;
+    /* Ensure tap target ≥ 44px */
+    min-height: 44px;
+  }
+
+  .hero__subtitle-toggle:hover {
+    color: #E5C77A;
+  }
+
+  .hero__subtitle-toggle__arrow {
+    stroke: currentColor;
+    flex-shrink: 0;
+    transition: transform 400ms cubic-bezier(0.33, 1, 0.68, 1);
+  }
+
+  .hero__subtitle-toggle[aria-expanded="true"] .hero__subtitle-toggle__arrow {
+    transform: rotate(180deg);
   }
 }
 
@@ -1031,6 +1196,57 @@ body.is-intro-locked {
   font-size: 12px;
 }
 
+/* CTA "lead" — destaque máximo do CTA primário do hero: gradiente gold
+   metálico, glow dourado suave (nunca sombra escura dura), ícone-em-círculo
+   (button-in-button) e hover magnético. O header mantém o gold-solid sóbrio. */
+.btn--lead {
+  background: linear-gradient(135deg, #E5C77A 0%, #C9A961 55%, #A78A4B 100%);
+  border-color: #E5C77A;
+  padding: 16px 16px 16px 32px;   /* direita menor: o círculo do ícone fica flush */
+  box-shadow: 0 14px 38px -14px rgba(201, 169, 97, 0.6),
+              inset 0 1px 0 rgba(255, 255, 255, 0.3);
+  transition: transform 450ms cubic-bezier(0.32, 0.72, 0, 1),
+              box-shadow 450ms cubic-bezier(0.32, 0.72, 0, 1),
+              background 300ms cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+.btn--lead:hover {
+  background: linear-gradient(135deg, #EBD08C 0%, #D4B66E 55%, #B89A57 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 22px 50px -14px rgba(201, 169, 97, 0.72),
+              inset 0 1px 0 rgba(255, 255, 255, 0.36);
+}
+
+.btn--lead:active {
+  transform: translateY(0) scale(0.985);
+}
+
+.btn__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.16);
+  font-size: 15px;
+  line-height: 1;
+  /* mola leve no deslocamento do ícone → tensão cinética no hover */
+  transition: transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1),
+              background 200ms ease;
+}
+
+.btn--lead:hover .btn__icon {
+  transform: translate(3px, -1px);
+  background: rgba(0, 0, 0, 0.24);
+}
+
+/* Secundário do hero: gold-ghost com presença, mas sem competir com o lead. */
+.hero__ctas .btn--gold-ghost {
+  border-color: rgba(201, 169, 97, 0.6);
+  color: rgba(229, 199, 122, 0.88);
+}
+
 /* -------------------------------------------------------------------------
    Service Cards (Áreas de Atuação)
    ------------------------------------------------------------------------- */
@@ -1041,10 +1257,19 @@ body.is-intro-locked {
   gap: 24px;
 }
 
+/* 4 áreas: 2 colunas no tablet, 4 no desktop. 1/2/4 dividem 4 (sem card órfã;
+   3 colunas deixaria a 4ª sozinha numa linha). */
 @media (min-width: 768px) {
   .services-grid {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 32px;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 28px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .services-grid {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 24px;
   }
 }
 
@@ -1241,6 +1466,18 @@ body.is-intro-locked {
   background: #1A1A1A;
 }
 
+/* Ícone-cliente (medalhão gold) no lugar da foto, dentro da janela da moldura,
+   SEM fundo de placeholder. object-fit: contain preserva o círculo; o inset um
+   pouco maior dá respiro entre o anel do medalhão e a moldura. */
+.profile__frame img.profile__icon {
+  position: absolute;
+  inset: 15%;
+  width: 70%;
+  height: 70%;
+  object-fit: contain;
+  z-index: 1;
+}
+
 .profile__placeholder {
   position: absolute;
   inset: 14%;
@@ -1324,18 +1561,33 @@ body.is-intro-locked {
 
 .location-info dl {
   display: grid;
-  gap: 32px;
+  gap: 0;
   margin: 0;
+}
+
+/* Separador gold entre cada item — primeiro item sem linha acima */
+.location-info dl > div {
+  padding: 24px 0;
+  border-bottom: 1px solid rgba(201, 169, 97, 0.25);
+}
+
+.location-info dl > div:first-child {
+  padding-top: 0;
+}
+
+.location-info dl > div:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
 }
 
 .location-info dt {
   font-family: 'Cinzel', serif;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
   color: #C9A961;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .location-info dd {
@@ -1360,6 +1612,58 @@ body.is-intro-locked {
   height: 400px;
   border-radius: 4px;
   border: 1px solid #2A2A2A;
+}
+
+/* Moldura HAAS sobre o mapa — wrapper quadrado com overlay PNG.
+   transform:translateZ(0) promove para camada GPU própria, evitando que a
+   animação translateY do .location-grid.reveal dispare repaints no iframe
+   (causa raiz do flicker branco nas bordas). */
+.map-frame-wrapper {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  background: #0A0A0A;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+.map-frame-wrapper .location-map {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-radius: 0;
+  /* Máscara gradual que oculta o fundo branco do iframe nas faixas
+     correspondentes ao frame preto opaco da moldura PNG.
+     Top: 8% fade (borda + canto arredondado superior).
+     Bottom: 4% fade (88→92%) — borda inferior + área do logo. */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 8%,
+    black 88%,
+    transparent 92%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0%,
+    black 8%,
+    black 88%,
+    transparent 92%
+  );
+}
+
+.map-frame-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  pointer-events: none;
+  z-index: 1;
+  user-select: none;
 }
 
 /* -------------------------------------------------------------------------
@@ -1688,15 +1992,16 @@ body.is-intro-locked {
   bottom: 0;
   left: 0;
   right: 0;
-  background: #FFFFFF;
-  padding: 16px;
-  /* max() garante padding mínimo de 16px e respeita a safe-area do iPhone —
-     a barra encosta na home indicator sem cortar o pill button. */
-  padding-bottom: max(16px, env(safe-area-inset-bottom));
+  background: #E8E5DF;
+  padding: 10px 16px;
+  /* max() respeita a safe-area do iPhone — barra encosta na home indicator
+     sem cortar o pill button. */
+  padding-bottom: max(10px, env(safe-area-inset-bottom));
   display: none;
   justify-content: center;
+  align-items: center;
   z-index: 81;
-  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.15);
   opacity: 0;
   transform: translateY(100%);
   transition: opacity 400ms ease, transform 400ms ease;
@@ -2701,13 +3006,17 @@ body.is-intro-locked {
    em telas estreitas. Reduzimos o tracking só nos elementos editoriais grandes,
    mantendo o tracking institucional nos labels Cinzel pequenos (eyebrows). */
 @media (max-width: 640px) {
-  .hero__headline,
   .article-hero__title,
   .blog-card__title,
   .next-article__title,
   .article-body h2 {
     letter-spacing: 0.018em;
   }
+
+  /* Tiers do headline do hero: tracking reduzido p/ não virar "labirinto de
+     letras" em telas estreitas, mas ainda aberto o bastante p/ caráter editorial. */
+  .hero__headline-lead { letter-spacing: 0.06em; }
+  .hero__headline-areas { letter-spacing: 0.045em; }
 
   /* Eyebrows/categorias mantêm tracking espaçado, mas reduzido pra caber melhor.
      Preserva o caráter "label institucional" sem causar quebras visuais. */
@@ -2721,15 +3030,18 @@ body.is-intro-locked {
    finais (hero revelado, drawer aberto, toggle como X) continuam sendo aplicados
    instantaneamente — sem animação, mas com o resultado correto. */
 @media (prefers-reduced-motion: reduce) {
-  .hero__bg video,
-  .hero__bg img,
+  .hero__bg-final,
   .nav-toggle span,
   .nav-drawer__close,
-  .nav-drawer > a {
+  .nav-drawer__eyebrow,
+  .nav-drawer__list li,
+  .nav-drawer__foot {
     transition: none !important;
   }
   .nav-drawer.is-open .nav-drawer__close,
-  .nav-drawer.is-open > a {
+  .nav-drawer.is-open .nav-drawer__eyebrow,
+  .nav-drawer.is-open .nav-drawer__list li,
+  .nav-drawer.is-open .nav-drawer__foot {
     transition-delay: 0ms !important;
   }
 }
@@ -2746,6 +3058,8 @@ body.is-intro-locked {
    ------------------------------------------------------------------------- */
 @media (hover: none) {
   .btn--gold-solid:hover,
+  .btn--lead:hover,
+  .btn--lead:hover .btn__icon,
   .btn--gold-ghost:hover,
   .btn--white-ghost:hover,
   .service-card:hover,
