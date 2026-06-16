@@ -2499,6 +2499,19 @@ body.is-intro-locked {
   max-width: 820px;
 }
 
+/* Mobile: encurta o respiro do banner — o padding-top de 200px deixava um vão
+   grande de imagem entre o header fixo e o título, e o banner ocupava ~90% da
+   tela. Reduz o topo (clearance do header + respiro) e a base. */
+@media (max-width: 768px) {
+  .article-hero {
+    padding-top: 116px;
+    padding-bottom: 52px;
+  }
+  .article-hero--banner .article-hero__title {
+    font-size: clamp(28px, 7.6vw, 40px);
+  }
+}
+
 .article-hero__layout {
   display: grid;
   grid-template-columns: 1fr;
