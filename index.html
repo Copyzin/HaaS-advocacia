@@ -51,7 +51,7 @@
   </script>
 
   <!-- Custom styles + tokens -->
-  <link rel="stylesheet" href="assets/css/styles.css">
+  <link rel="stylesheet" href="assets/css/styles.css?v=6">
 
   <style>
     /* Bento "Áreas de Atuação" — MESMO padrão da aba Serviços (escopo: index.html).
@@ -557,7 +557,7 @@
   <!-- =====================================================================
        MOBILE: FAB WhatsApp + Sticky CTA bar
        ===================================================================== -->
-  <a href="https://wa.me/5511984337675?text=Ol%C3%A1!%20Vim%20pelo%20site%20da%20HAAS%20Advocacia%20e%20gostaria%20de%20mais%20informa%C3%A7%C3%B5es." target="_blank" rel="noopener"
+  <a id="whatsappFab" href="https://wa.me/5511984337675?text=Ol%C3%A1!%20Vim%20pelo%20site%20da%20HAAS%20Advocacia%20e%20gostaria%20de%20mais%20informa%C3%A7%C3%B5es." target="_blank" rel="noopener"
      class="fab-whatsapp" aria-label="Conversar pelo WhatsApp">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.95.51 3.78 1.41 5.36L2 22l4.86-1.51a9.92 9.92 0 0 0 5.18 1.4h.01c5.46 0 9.91-4.45 9.91-9.92S17.5 2 12.04 2zm5.79 14.18c-.24.68-1.39 1.3-1.94 1.38-.5.07-1.14.1-1.83-.12-.42-.13-.97-.32-1.66-.61-2.93-1.27-4.84-4.22-4.99-4.42-.15-.2-1.18-1.57-1.18-3 0-1.42.75-2.13 1.02-2.42.27-.29.59-.36.78-.36.2 0 .4 0 .57.01.18.01.42-.07.66.5.24.58.83 2 .9 2.14.07.14.12.31.02.5-.1.2-.15.31-.29.49-.15.17-.31.39-.44.52-.15.15-.3.31-.13.6.17.29.76 1.26 1.63 2.04 1.12 1 2.06 1.31 2.35 1.46.29.15.46.13.63-.08.17-.2.73-.85.92-1.15.2-.29.4-.24.66-.15.27.1 1.7.8 1.98.95.29.15.49.22.56.34.07.13.07.71-.17 1.39z"/></svg>
   </a>
@@ -569,12 +569,36 @@
     </a>
   </div>
 
+  <!-- ============ WHATSAPP CHAT WIDGET (desktop) ============ -->
+  <div id="waWidget" class="wa-widget hidden md:block"
+    data-teaser-delay="10000"
+    data-msg1="Olá! Sou a assistente virtual da HAAS Advocacia. Tem alguma dúvida jurídica? Escolha um tema abaixo ou fale direto conosco."
+    data-msg2="Oi, tudo bem? Posso adiantar algumas respostas por aqui. Toque numa dúvida abaixo para começar."
+    data-msg3="Olá! Veja as dúvidas mais comuns abaixo, ou fale com a gente no WhatsApp quando quiser."
+    data-end="Ficou com outra dúvida? É só falar com a gente no WhatsApp."
+    data-faqs='[{"q":"Como agendo uma primeira consulta?","a":"Basta enviar uma mensagem pelo WhatsApp ou ligar para o nosso telefone. Na primeira conversa, ouvimos sua demanda e indicamos a advogada responsável pela área."},{"q":"O atendimento é presencial ou também remoto?","a":"Atendemos das duas formas. Reuniões online são feitas via WhatsApp ou plataforma de vídeo de sua preferência, e o presencial acontece na nossa sede com hora marcada."},{"q":"Vocês atendem em todo o Brasil?","a":"Sim, atuamos em todo o território nacional. Processos no INSS podem ser conduzidos remotamente; causas trabalhistas e cíveis dependem do foro competente — consulte a advogada responsável."},{"q":"Quanto custa o atendimento?","a":"Cada caso é avaliado individualmente. Após a primeira conversa, apresentamos um orçamento detalhado, sempre com transparência e dentro da tabela da OAB."},{"q":"Atendem empresas em causas trabalhistas?","a":"Sim. A Dra. Heloísa atua na defesa e consultoria preventiva de empresas, com revisão de contratos, mediação e gestão de passivos trabalhistas."}]'>
+    <div class="wa-panel">
+      <div class="wa-scroll" id="waScroll">
+        <div class="wa-thread" id="waThread"></div>
+        <div class="wa-quick" id="waQuick" aria-label="Dúvidas frequentes"></div>
+      </div>
+      <a class="wa-cta" href="https://wa.me/5511984337675?text=Ol%C3%A1!%20Vim%20pelo%20site%20da%20HAAS%20Advocacia%20e%20gostaria%20de%20iniciar%20um%20atendimento." target="_blank" rel="noopener">Falar no WhatsApp</a>
+    </div>
+    <button type="button" class="wa-close" id="waClose" aria-label="Fechar conversa"></button>
+  </div>
+
+  <!-- WhatsApp teaser (convite de descanso, desktop) -->
+  <div id="waTeaser" class="wa-teaser hidden md:block">
+    <button type="button" class="wa-teaser-bubble" id="waTeaserOpen">Olá, como posso ajudar?</button>
+    <button type="button" class="wa-teaser-x" id="waTeaserClose" aria-label="Dispensar mensagem"></button>
+  </div>
+
   <!-- =====================================================================
        JS
        ===================================================================== -->
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
-  <script src="assets/js/main.js"></script>
+  <script src="assets/js/main.js?v=5"></script>
   <script>document.getElementById('year').textContent = new Date().getFullYear();</script>
   <script>
     /* Bento "Áreas de Atuação" (home): entrada em stagger. O glow é fixo via CSS (--mx/--my). */

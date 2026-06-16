@@ -2458,6 +2458,45 @@ body.is-intro-locked {
   height: 1px;
   background: linear-gradient(90deg, transparent 0%, rgba(201, 169, 97, 0.4) 50%, transparent 100%);
   pointer-events: none;
+  z-index: 3;
+}
+
+/* -------------------------------------------------------------------------
+   Article hero — variante banner full-bleed (T2): foto documental de fundo,
+   escurecida + leve grade quente, com o título sobreposto. Conteúdo acima do véu.
+   ------------------------------------------------------------------------- */
+.article-hero--banner .article-hero__bg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  /* Blur leve melhora a legibilidade do título sobreposto; o scale evita o
+     halo translúcido nas bordas que o blur criaria com object-fit: cover. */
+  filter: brightness(0.5) saturate(0.9) sepia(0.1) blur(3px);
+  transform: scale(1.06);
+}
+.article-hero--banner::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.35) 42%, rgba(5, 5, 5, 0.9) 100%),
+    radial-gradient(ellipse at 28% 38%, rgba(201, 169, 97, 0.12), transparent 60%);
+}
+.article-hero--banner > .container-page {
+  position: relative;
+  z-index: 2;
+}
+/* Sem o card lateral, o conteúdo ocupa uma coluna única (largura de leitura). */
+.article-hero--banner .article-hero__layout {
+  display: block;
+}
+.article-hero--banner .article-hero__layout > div {
+  max-width: 820px;
 }
 
 .article-hero__layout {
@@ -2851,9 +2890,12 @@ body.is-intro-locked {
 .fact-card__number {
   font-family: 'Cinzel', serif;
   font-weight: 700;
-  font-size: clamp(32px, 4vw, 44px);
-  line-height: 1;
+  /* Reduzido + overflow-wrap: tokens com palavra larga ("2 ANOS", "ART. 483")
+     cabem na coluna estreita do bento sem serem cortados pelo overflow:hidden. */
+  font-size: clamp(24px, 3vw, 36px);
+  line-height: 1.05;
   letter-spacing: 0.02em;
+  overflow-wrap: break-word;
   color: #E5C77A;
   background: linear-gradient(135deg, #E5C77A 0%, #C9A961 50%, #A78A4B 100%);
   -webkit-background-clip: text;
@@ -3198,6 +3240,280 @@ body.is-intro-locked {
 }
 
 /* -------------------------------------------------------------------------
+   WhatsApp chat widget + teaser (desktop, hover do FAB)
+
+   Tokens HAAS: borda gold (linguagem do projeto), superficie branca legivel.
+   O FAB continua estilizado por .fab-whatsapp acima — sem redefinir aqui.
+   ------------------------------------------------------------------------- */
+
+:root {
+  --wa-line: #C9A961;
+  --wa-chip-border: rgba(201, 169, 97, 0.35);
+  --wa-ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.wa-widget {
+  position: fixed;
+  right: 32px;
+  bottom: 120px;
+  z-index: 59;
+  width: 272px;
+  font-family: 'Inter', system-ui, sans-serif;
+  transform-origin: bottom right;
+  opacity: 0;
+  transform: scale(0.9) translateY(4px);
+  pointer-events: none;
+  transition: opacity 0.35s var(--wa-ease), transform 0.4s var(--wa-ease);
+}
+
+.wa-widget.is-open {
+  opacity: 1;
+  transform: scale(1) translateY(0);
+  pointer-events: auto;
+}
+
+.wa-panel {
+  position: relative;
+  background: #F0F0F0;
+  border: 1.5px solid var(--wa-line, #C9A961);
+  border-radius: 16px;
+  padding: 14px;
+  box-shadow: 0 14px 34px rgba(0, 0, 0, 0.22);
+}
+
+.wa-panel::after {
+  content: "";
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  background: #F0F0F0;
+  border-right: 1.5px solid var(--wa-line, #C9A961);
+  border-bottom: 1.5px solid var(--wa-line, #C9A961);
+  border-bottom-right-radius: 3px;
+  bottom: -8px;
+  right: 30px;
+  transform: rotate(45deg);
+}
+
+.wa-scroll {
+  max-height: min(58vh, 400px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: thin;
+  scrollbar-color: #d2d2d2 transparent;
+}
+
+.wa-scroll::-webkit-scrollbar { width: 5px; }
+.wa-scroll::-webkit-scrollbar-thumb { background: #d2d2d2; border-radius: 5px; }
+
+.wa-thread { display: flex; flex-direction: column; }
+
+.wa-bubble {
+  max-width: 90%;
+  padding: 9px 12px;
+  font-size: 0.92rem;
+  font-weight: 500;
+  line-height: 1.55;
+  border-radius: 13px;
+  margin-bottom: 12px;
+  overflow-wrap: break-word;
+  animation: waMsgIn 0.35s var(--wa-ease) both;
+}
+
+.wa-bubble--in {
+  background: #E2E2E2;
+  color: #111111;
+  border-top-left-radius: 4px;
+  align-self: flex-start;
+}
+
+.wa-bubble--out {
+  background: #0A0A0A;
+  color: #fff;
+  border-top-right-radius: 4px;
+  align-self: flex-end;
+}
+
+.wa-bubble--typing { padding: 11px 13px; }
+
+.wa-dots { display: inline-flex; gap: 4px; align-items: center; }
+
+.wa-dots span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #a8a8a8;
+  animation: waType 1.2s infinite ease-in-out;
+}
+
+.wa-dots span:nth-child(2) { animation-delay: 0.18s; }
+.wa-dots span:nth-child(3) { animation-delay: 0.36s; }
+
+@keyframes waType {
+  0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-4px); opacity: 1; }
+}
+
+@keyframes waMsgIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: none; }
+}
+
+.wa-quick { display: flex; flex-direction: column; gap: 6px; margin-top: 5px; }
+
+.wa-chip {
+  width: 100%;
+  text-align: left;
+  background: #fff;
+  border: 1px solid var(--wa-chip-border, rgba(201, 169, 97, 0.45));
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #1A1A1A;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease, background 0.2s ease;
+}
+
+.wa-chip:hover {
+  border-color: #C9A961;
+  color: #0A0A0A;
+  background: #FAFAFA;
+}
+
+.wa-quick-end {
+  font-size: 0.82rem;
+  font-weight: 500;
+  line-height: 1.45;
+  color: #5A5A5A;
+  margin: 6px 2px 0;
+}
+
+.wa-cta {
+  display: block;
+  text-align: center;
+  margin-top: 12px;
+  padding: 10px 16px;
+  background: #0F0F0F;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  color: #C9A961;
+  text-decoration: none;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.wa-cta:hover { background: #1A1A1A; color: #E5C77A; text-decoration: none; }
+
+.wa-close {
+  position: absolute;
+  top: -10px;
+  right: -10px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1.5px solid var(--wa-line, #C9A961);
+  background: #fff;
+  color: var(--wa-line, #C9A961);
+  cursor: pointer;
+  padding: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.14);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.wa-close:hover { background: #C9A961; color: #fff; }
+
+.wa-teaser {
+  position: fixed;
+  right: 32px;
+  bottom: 120px;
+  z-index: 58;
+  opacity: 0;
+  transform: translateY(6px) scale(0.96);
+  transform-origin: bottom right;
+  pointer-events: none;
+  transition: opacity 0.35s var(--wa-ease), transform 0.4s var(--wa-ease);
+}
+
+.wa-teaser.is-shown { opacity: 1; transform: none; pointer-events: auto; }
+
+.wa-teaser-bubble {
+  position: relative;
+  display: block;
+  max-width: 210px;
+  background: #F0F0F0;
+  border: 1.5px solid var(--wa-line, #C9A961);
+  border-radius: 14px;
+  padding: 11px 14px;
+  font-family: 'Inter', system-ui, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: #181818;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+  transition: background 0.2s ease;
+}
+
+.wa-teaser-bubble:hover { background: #E8E8E8; }
+
+.wa-teaser-bubble::after {
+  content: "";
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background: #F0F0F0;
+  border-right: 1.5px solid var(--wa-line, #C9A961);
+  border-bottom: 1.5px solid var(--wa-line, #C9A961);
+  border-bottom-right-radius: 3px;
+  bottom: -7px;
+  right: 26px;
+  transform: rotate(45deg);
+}
+
+.wa-teaser-x {
+  position: absolute;
+  top: -9px;
+  right: -9px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 1.5px solid var(--wa-line, #C9A961);
+  background: #fff;
+  color: var(--wa-line, #C9A961);
+  cursor: pointer;
+  padding: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.14);
+  transition: background 0.2s ease, color 0.2s ease;
+}
+
+.wa-teaser-x:hover { background: #C9A961; color: #fff; }
+
+.wa-close::before,
+.wa-close::after,
+.wa-teaser-x::before,
+.wa-teaser-x::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 10px;
+  height: 1.5px;
+  background: currentColor;
+  border-radius: 2px;
+}
+
+.wa-close::before,
+.wa-teaser-x::before { transform: translate(-50%, -50%) rotate(45deg); }
+
+.wa-close::after,
+.wa-teaser-x::after { transform: translate(-50%, -50%) rotate(-45deg); }
+
+/* -------------------------------------------------------------------------
    Touch devices — neutraliza efeitos :hover para evitar "sticky state"
 
    Em devices sem hover real (touchscreens), o tap dispara :hover e o estado
@@ -3221,7 +3537,11 @@ body.is-intro-locked {
   .fab-whatsapp:hover,
   .nav-toggle:hover,
   .nav-drawer__close:hover,
-  .nav-drawer__cta-whatsapp:hover {
+  .nav-drawer__cta-whatsapp:hover,
+  .wa-chip:hover,
+  .wa-close:hover,
+  .wa-teaser-bubble:hover,
+  .wa-teaser-x:hover {
     background: revert;
     background-color: revert;
     color: revert;

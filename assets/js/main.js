@@ -966,6 +966,168 @@
   }
 
   /* -----------------------------------------------------------------------
+     WHATSAPP CHAT WIDGET (desktop: hover no FAB + teaser apos 10s)
+     ----------------------------------------------------------------------- */
+
+  function initWaChat() {
+    var waWidget = document.getElementById('waWidget');
+    var waFab = document.getElementById('whatsappFab');
+    if (!waWidget) return;
+
+    var waThread = document.getElementById('waThread');
+    var waQuick = document.getElementById('waQuick');
+    var waScroll = document.getElementById('waScroll');
+    var waMsgs = [waWidget.dataset.msg1, waWidget.dataset.msg2, waWidget.dataset.msg3].filter(Boolean);
+    var waWelcome = waMsgs.length ? waMsgs[Math.floor(Math.random() * waMsgs.length)] : 'Ola! Como posso ajudar?';
+    var waReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    var waFaqs = [];
+    if (waWidget.dataset.faqs) {
+      try {
+        JSON.parse(waWidget.dataset.faqs).forEach(function (f) {
+          if (f && f.q && f.a) waFaqs.push({ q: String(f.q), a: String(f.a), used: false });
+        });
+      } catch (e) {}
+    }
+    /* leitura ao vivo do #faqList se data-faqs estiver vazio */
+    if (waFaqs.length === 0) {
+      Array.prototype.forEach.call(document.querySelectorAll('#faqList .faq-item'), function (it) {
+        var q = it.querySelector('summary span');
+        var a = it.querySelector('.faq-a p');
+        if (q && a) waFaqs.push({ q: q.textContent.trim(), a: a.textContent.trim(), used: false });
+      });
+    }
+
+    function waScrollBottom() { if (waScroll) waScroll.scrollTop = waScroll.scrollHeight; }
+    function waScrollToEl(el) {
+      if (!waScroll || !el) return;
+      var top = el.getBoundingClientRect().top - waScroll.getBoundingClientRect().top + waScroll.scrollTop;
+      waScroll.scrollTop = Math.max(0, top - 8);
+    }
+    function waBubble(side, text) {
+      var b = document.createElement('div');
+      b.className = 'wa-bubble wa-bubble--' + side;
+      b.textContent = text;
+      if (waThread) waThread.appendChild(b);
+      waScrollBottom();
+      return b;
+    }
+    function waTypingBubble() {
+      var b = document.createElement('div');
+      b.className = 'wa-bubble wa-bubble--in wa-bubble--typing';
+      b.innerHTML = '<span class="wa-dots"><span></span><span></span><span></span></span>';
+      if (waThread) waThread.appendChild(b);
+      waScrollBottom();
+      return b;
+    }
+    function waSay(text, cb) {
+      if (waReduced) { waBubble('in', text); if (cb) cb(); return; }
+      var t = waTypingBubble();
+      setTimeout(function () { if (t.parentNode) t.parentNode.removeChild(t); waBubble('in', text); if (cb) cb(); }, 750);
+    }
+    function waRenderChips() {
+      if (!waQuick) return;
+      waQuick.innerHTML = '';
+      var remaining = 0;
+      waFaqs.forEach(function (f) {
+        if (f.used) return;
+        remaining++;
+        var c = document.createElement('button');
+        c.type = 'button';
+        c.className = 'wa-chip';
+        c.textContent = f.q;
+        c.addEventListener('click', function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          waPinned = true;
+          f.used = true;
+          var qb = waBubble('out', f.q);
+          waQuick.innerHTML = '';
+          waSay(f.a, function () { waRenderChips(); waScrollToEl(qb); });
+        });
+        waQuick.appendChild(c);
+      });
+      if (remaining === 0) {
+        var p = document.createElement('p');
+        p.className = 'wa-quick-end';
+        p.textContent = waWidget.dataset.end || 'Fale com a gente no WhatsApp.';
+        waQuick.appendChild(p);
+      }
+      waScrollBottom();
+    }
+
+    var waBuilt = false;
+    function waBuildChat() { if (waBuilt) return; waBuilt = true; waSay(waWelcome, waRenderChips); }
+
+    var waTeaser = document.getElementById('waTeaser');
+    var waTeaserOpen = document.getElementById('waTeaserOpen');
+    var waTeaserClose = document.getElementById('waTeaserClose');
+    var waCanHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    var waOverFab = false, waOverPanel = false, waCloseT = null, waDismissed = false, waPinned = false, waReady = false, waTimerStarted = false;
+    var WA_TEASER_DELAY = parseInt(waWidget.dataset.teaserDelay, 10) || 10000;
+
+    function waFabVisible() { return !waFab || waFab.classList.contains('is-visible'); }
+    function waChatOpen() { return waWidget.classList.contains('is-open'); }
+    function waSyncTeaser() {
+      if (!waTeaser) return;
+      if (waReady && !waDismissed && waFabVisible() && !waChatOpen()) waTeaser.classList.add('is-shown');
+      else waTeaser.classList.remove('is-shown');
+    }
+    function waHideTeaser() { if (waTeaser) waTeaser.classList.remove('is-shown'); }
+    function waStartTimer() {
+      if (waTimerStarted || waDismissed || !waFabVisible()) return;
+      waTimerStarted = true;
+      setTimeout(function () { waReady = true; waSyncTeaser(); }, WA_TEASER_DELAY);
+    }
+    function waOpen() {
+      if (waDismissed || !waFabVisible()) return;
+      waReady = true;
+      waHideTeaser();
+      waWidget.classList.add('is-open');
+      waBuildChat();
+    }
+    function waBackToTeaser() {
+      waWidget.classList.remove('is-open');
+      waPinned = false;
+      waSyncTeaser();
+    }
+    function waDismiss() {
+      waDismissed = true; waPinned = false;
+      waWidget.classList.remove('is-open');
+      waHideTeaser();
+    }
+    function waScheduleClose() {
+      clearTimeout(waCloseT);
+      waCloseT = setTimeout(function () {
+        if (!waOverFab && !waOverPanel && !waPinned) waBackToTeaser();
+      }, 260);
+    }
+
+    var waCloseBtn = document.getElementById('waClose');
+    if (waCloseBtn) waCloseBtn.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); waDismiss(); });
+    if (waTeaserOpen) waTeaserOpen.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); waPinned = true; waOpen(); });
+    if (waTeaserClose) waTeaserClose.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); waDismiss(); });
+
+    if (waCanHover) {
+      if (waFab) {
+        waFab.addEventListener('pointerenter', function () { waOverFab = true; clearTimeout(waCloseT); waOpen(); });
+        waFab.addEventListener('pointerleave', function () { waOverFab = false; waScheduleClose(); });
+      }
+      waWidget.addEventListener('pointerenter', function () { waOverPanel = true; clearTimeout(waCloseT); });
+      waWidget.addEventListener('pointerleave', function () { waOverPanel = false; waScheduleClose(); });
+      document.addEventListener('click', function (e) {
+        if (!waChatOpen()) return;
+        if (waWidget.contains(e.target) || (waFab && waFab.contains(e.target)) || (waTeaser && waTeaser.contains(e.target))) return;
+        waBackToTeaser();
+      });
+    }
+
+    window.addEventListener('scroll', function () { waStartTimer(); waSyncTeaser(); }, { passive: true });
+    waStartTimer();
+    waSyncTeaser();
+  }
+
+  /* -----------------------------------------------------------------------
      INIT
      ----------------------------------------------------------------------- */
 
@@ -982,6 +1144,7 @@
     initNavDropdowns();
     initSubtitleToggle();
     initPreciseSectionScroll();
+    initWaChat();
   }
 
   if (document.readyState === 'loading') {
