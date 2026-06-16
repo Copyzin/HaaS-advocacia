@@ -1,0 +1,20 @@
+# HAAS Advocacia — URLs limpas (sem .html)
+# Hospedagem: Hostinger (Apache/LiteSpeed, mod_rewrite via .htaccess)
+
+Options -Indexes
+DirectoryIndex index.html
+
+RewriteEngine On
+
+# 1) 301: remove ".html" da URL pública (canonicalização)
+RewriteCond %{THE_REQUEST} \s/+([^?\s]+)\.html[\s?] [NC]
+RewriteRule ^ /%1 [R=301,L]
+
+# 2) 301: ".../index" -> diretório (/, /blog/, /servicos/)
+RewriteCond %{THE_REQUEST} \s/+([^?\s]*?)index[\s?] [NC]
+RewriteRule ^ /%1 [R=301,L]
+
+# 3) Reescrita interna: /rota -> rota.html (quando o arquivo existir)
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteCond %{REQUEST_FILENAME}\.html -f
+RewriteRule ^(.+?)/?$ $1.html [L]

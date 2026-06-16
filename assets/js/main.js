@@ -857,6 +857,115 @@
   }
 
   /* -----------------------------------------------------------------------
+     NAV DROPDOWNS (desktop) — Serviços e Blog ganham um submenu com as rotas.
+     Hover tolerante: o painel é FILHO do grupo (mouse sobre ele não fecha);
+     o fechamento tem delay (re-entrada rápida cancela o timer); e um "bridge"
+     transparente (padding-top do painel) elimina o dead-zone entre o link e o
+     painel. Progressive enhancement: sem JS, os tabs ainda linkam para
+     /servicos/ e /blog/. Só aparece no desktop (.site-nav é display:none < 1024px).
+     ----------------------------------------------------------------------- */
+  function initNavDropdowns() {
+    const nav = $('.site-nav');
+    if (!nav) return;
+
+    const MENUS = {
+      '/servicos/': {
+        eyebrow: 'Áreas de Atuação',
+        items: [
+          { label: 'Previdenciário', sub: 'Dra. Aline', href: '/servicos/previdenciario' },
+          { label: 'Trabalhista', sub: 'Dra. Heloísa', href: '/servicos/trabalhista' },
+          { label: 'Família', sub: 'Dra. Aline e Dra. Heloísa', href: '/servicos/familia' },
+          { label: 'Direito do Consumidor', sub: 'Dra. Aline e Dra. Heloísa', href: '/servicos/consumidor' },
+        ],
+      },
+      '/blog/': {
+        eyebrow: 'Últimos artigos',
+        items: [
+          { label: 'Aposentadoria após a Reforma', sub: 'Previdenciário', href: '/blog/aposentadoria-tempo-contribuicao-pos-reforma' },
+          { label: 'Rescisão Indireta', sub: 'Trabalhista', href: '/blog/rescisao-indireta-quando-trabalhador-pode-pedir' },
+          { label: 'Divórcio Consensual', sub: 'Família', href: '/blog/divorcio-consensual-como-funciona' },
+        ],
+      },
+    };
+
+    const OPEN_DELAY = 120;  // ms — exige um leve "dwell"; um flick de passagem não abre
+    const CLOSE_DELAY = 220; // ms — tolerância ao sair; re-entrada cancela
+
+    // Estado compartilhado: garante que só UM dropdown fique aberto por vez.
+    const controllers = [];
+    const closeOthers = (except) => controllers.forEach((c) => { if (c !== except) c.closeNow(); });
+
+    $$('a', nav).forEach((trigger) => {
+      const menu = MENUS[trigger.getAttribute('href')];
+      if (!menu) return;
+
+      // Agrupa trigger + painel sem quebrar o flex da nav.
+      const group = document.createElement('span');
+      group.className = 'nav-group';
+      trigger.parentNode.insertBefore(group, trigger);
+      group.appendChild(trigger);
+      trigger.classList.add('nav-group__trigger');
+      trigger.setAttribute('aria-haspopup', 'true');
+      trigger.setAttribute('aria-expanded', 'false');
+
+      const itemsHTML = menu.items.map((it) =>
+        '<a class="nav-dropdown__item" href="' + it.href + '" role="menuitem">' +
+          '<span class="nav-dropdown__label">' + it.label + '</span>' +
+          '<span class="nav-dropdown__sub">' + it.sub + '</span>' +
+        '</a>'
+      ).join('');
+
+      const panel = document.createElement('div');
+      panel.className = 'nav-dropdown';
+      panel.setAttribute('role', 'menu');
+      panel.innerHTML =
+        '<div class="nav-dropdown__inner">' +
+          '<p class="nav-dropdown__eyebrow">' + menu.eyebrow + '</p>' +
+          itemsHTML +
+        '</div>';
+      group.appendChild(panel);
+
+      let openT = null, closeT = null;
+      const isOpen = () => group.classList.contains('is-open');
+      const showNow = () => {
+        clearTimeout(openT); clearTimeout(closeT);
+        closeOthers(ctrl);            // exclusão mútua: fecha o outro IMEDIATAMENTE
+        group.classList.add('is-open');
+        trigger.setAttribute('aria-expanded', 'true');
+      };
+      const closeNow = () => {
+        clearTimeout(openT); clearTimeout(closeT);
+        group.classList.remove('is-open');
+        trigger.setAttribute('aria-expanded', 'false');
+      };
+      const ctrl = { closeNow };
+      controllers.push(ctrl);
+
+      group.addEventListener('mouseenter', () => {
+        clearTimeout(closeT);         // cancela fechamento próprio (re-entrada rápida)
+        if (isOpen()) return;
+        // Intenção de abertura: só abre após o dwell. Um flick de passagem
+        // (sair antes do OPEN_DELAY) cancela e NÃO abre — o dropdown que já
+        // estava aberto mantém a prioridade. Uma pausa abre este e fecha o outro.
+        clearTimeout(openT);
+        openT = setTimeout(showNow, OPEN_DELAY);
+      });
+      group.addEventListener('mouseleave', () => {
+        clearTimeout(openT);          // cancela abertura pendente (flick)
+        if (isOpen()) { clearTimeout(closeT); closeT = setTimeout(closeNow, CLOSE_DELAY); }
+      });
+      // Teclado: foco abre na hora (sem dwell); Esc fecha.
+      group.addEventListener('focusin', () => { clearTimeout(closeT); showNow(); });
+      group.addEventListener('focusout', (e) => {
+        if (!group.contains(e.relatedTarget)) { clearTimeout(closeT); closeT = setTimeout(closeNow, CLOSE_DELAY); }
+      });
+      group.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') { closeNow(); trigger.focus(); }
+      });
+    });
+  }
+
+  /* -----------------------------------------------------------------------
      INIT
      ----------------------------------------------------------------------- */
 
@@ -870,6 +979,7 @@
     initMobileCTAs();
     initReveal();
     initMobileMenu();
+    initNavDropdowns();
     initSubtitleToggle();
     initPreciseSectionScroll();
   }
