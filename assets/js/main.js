@@ -1063,7 +1063,7 @@
     var waTeaserOpen = document.getElementById('waTeaserOpen');
     var waTeaserClose = document.getElementById('waTeaserClose');
     var waCanHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
-    var waOverFab = false, waOverPanel = false, waCloseT = null, waDismissed = false, waPinned = false, waReady = false, waTimerStarted = false;
+    var waOverFab = false, waOverPanel = false, waCloseT = null, waReopenT = null, waDismissed = false, waPinned = false, waReady = false, waTimerStarted = false;
     var WA_TEASER_DELAY = parseInt(waWidget.dataset.teaserDelay, 10) || 10000;
 
     function waFabVisible() { return !waFab || waFab.classList.contains('is-visible'); }
@@ -1110,8 +1110,28 @@
 
     if (waCanHover) {
       if (waFab) {
-        waFab.addEventListener('pointerenter', function () { waOverFab = true; clearTimeout(waCloseT); waOpen(); });
-        waFab.addEventListener('pointerleave', function () { waOverFab = false; waScheduleClose(); });
+        var WA_REOPEN_DELAY = 600; // ms de hover sobre o FAB para reabrir o chat apos o "X"
+        waFab.addEventListener('pointerenter', function () {
+          waOverFab = true;
+          clearTimeout(waCloseT);
+          if (waDismissed) {
+            // A dispensa pelo "X" nao e permanente: manter o cursor sobre o FAB
+            // por WA_REOPEN_DELAY reseta waDismissed e reabre o chat.
+            clearTimeout(waReopenT);
+            waReopenT = setTimeout(function () {
+              if (!waOverFab) return;          // saiu do FAB antes de completar: nao reabre
+              waDismissed = false;
+              waOpen();
+            }, WA_REOPEN_DELAY);
+          } else {
+            waOpen();
+          }
+        });
+        waFab.addEventListener('pointerleave', function () {
+          waOverFab = false;
+          clearTimeout(waReopenT);             // cancela a reabertura pendente
+          waScheduleClose();
+        });
       }
       waWidget.addEventListener('pointerenter', function () { waOverPanel = true; clearTimeout(waCloseT); });
       waWidget.addEventListener('pointerleave', function () { waOverPanel = false; waScheduleClose(); });
