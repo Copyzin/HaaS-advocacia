@@ -324,15 +324,89 @@
     const header = $('.site-header');
     if (!header) return;
 
+    const hero = $('.hero');
+    const RETRACT_ZONE = 220; // px do fundo da hero onde começa a retração proporcional
+    const UP_THRESHOLD = 60;  // px de scroll-up acumulado necessário para revelar
+
+    let lastY = window.scrollY;
+    let upAccum = 0;
+    let hidden = false;
+
+    const heroBottom = () => (hero ? hero.offsetHeight : window.innerHeight);
+
     const onScroll = () => {
-      if (window.scrollY > 80) {
+      const y = window.scrollY;
+      const hBottom = heroBottom();
+      const retractStart = Math.max(0, hBottom - RETRACT_ZONE);
+      const delta = y - lastY;
+
+      if (y <= retractStart) {
+        /* ---------- Zona livre: acima da retração ---------- */
+        if (hidden || header.style.transform) {
+          header.style.transition = '';
+          header.style.transform = '';
+        }
+        hidden = false;
+        upAccum = 0;
+        header.classList.toggle('is-solid', y > 80);
+
+      } else if (y <= hBottom) {
+        /* ---------- Zona de retração proporcional (sem CSS transition) ---------- */
         header.classList.add('is-solid');
+        upAccum = 0;
+        const progress = Math.min(1, (y - retractStart) / RETRACT_ZONE);
+
+        if (delta >= 0) {
+          /* Rolando para baixo: retração proporcional direta */
+          header.style.transition = 'none';
+          header.style.transform = `translateY(-${progress * 100}%)`;
+          hidden = progress >= 1;
+
+        } else if (hidden) {
+          /* Rolando para cima vindo de abaixo (header oculto): revelar proporcional */
+          header.style.transition = 'none';
+          header.style.transform = `translateY(-${progress * 100}%)`;
+          hidden = false;
+          if (progress <= 0) {
+            header.style.transition = '';
+            header.style.transform = '';
+          }
+
+        } else {
+          /* Rolando para cima, header já visível (reversão a meio caminho):
+             limpa inline styles — CSS transition anima suavemente de volta ao topo */
+          header.style.transition = '';
+          header.style.transform = '';
+          hidden = false;
+        }
+
       } else {
-        header.classList.remove('is-solid');
+        /* ---------- Abaixo da hero: hide / reveal por acumulação ---------- */
+        header.classList.add('is-solid');
+
+        if (delta < 0) {
+          upAccum += -delta;
+          if (upAccum >= UP_THRESHOLD && hidden) {
+            header.style.transition = '';
+            header.style.transform = 'translateY(0)';
+            hidden = false;
+          }
+        } else if (delta > 0) {
+          upAccum = 0;
+          if (!hidden) {
+            header.style.transition = '';
+            header.style.transform = 'translateY(-100%)';
+            hidden = true;
+          }
+        }
       }
+
+      lastY = y;
     };
 
     onScrollThrottled(onScroll);
+    // Recalcula na mudança de breakpoint (hero pode mudar de altura)
+    window.addEventListener('resize', () => { upAccum = 0; lastY = window.scrollY; }, { passive: true });
   }
 
   /* -----------------------------------------------------------------------
